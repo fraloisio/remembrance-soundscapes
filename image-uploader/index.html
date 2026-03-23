@@ -1,30 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
-
-  <!-- Version 0.1 completed on Nov 22 -->
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Hope & Despair – Audio Generator</title>
-
-  <!-- Space Grotesk -->
-  <link rel="preconnect" href="https://fonts.gstatic.com">
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&display=swap" rel="stylesheet">
-
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Jost:wght@200;400;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
   <!-- UPLOAD SCREEN -->
   <div id="screen-upload" class="screen active">
-    <h1>Hope & Despair</h1>
+    <h1>Hope &amp; Despair</h1>
+    <p class="subtitle">Upload an image from your visit.<br>It will be translated into sound.</p>
 
-    <p class="subtitle">Upload an image to generate its sound.</p>
+    <div class="upload-zone" id="upload-zone">
+      <svg class="upload-zone-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="17 8 12 3 7 8"/>
+        <line x1="12" y1="3" x2="12" y2="15"/>
+      </svg>
+      <span class="upload-zone-label">Drop image here or click to browse</span>
+      <span class="upload-zone-filename" id="filename-display"></span>
+      <input id="file-input" type="file" accept="image/*" />
+    </div>
 
-    <input id="file-input" type="file" accept="image/*" />
-    <button id="btn-generate" class="primary-btn">Generate Audio</button>
+    <button id="btn-generate" class="primary-btn" disabled>Generate Audio</button>
 
-    <!-- Fake toggle -->
+    <!-- Debug: hidden fake mode toggle -->
     <label class="fake-toggle">
       <input type="checkbox" id="fake-toggle" />
       Use Fake Mode (debug)
@@ -33,26 +38,21 @@
 
   <!-- LOADING SCREEN -->
   <div id="screen-loading" class="screen">
-    <div class="loader"></div>
+    <div class="loading-pulse"></div>
     <p class="loading-text">
-      Sending your image into the bubble network…
-      Its memory is dissolving, reshaping, waiting.
+      Listening to your image.<br>
+      Translating memory into sound.
     </p>
   </div>
 
   <!-- SUCCESS SCREEN -->
   <div id="screen-success" class="screen">
-    <img id="output-image" src="" class="circle-image" />
-
-    <h2 id="title-text" class="title"></h2>
-
+    <img id="output-image" src="" class="circle-image" alt="" />
+    <h2 id="title-text"></h2>
     <audio id="audio-player" controls></audio>
-
     <button id="btn-back" class="primary-btn">Generate Another</button>
-
     <a id="metadata-link" href="#" download class="metadata-link">Download metadata</a>
 
-    <!-- Fake toggle lives on all screens -->
     <label class="fake-toggle">
       <input type="checkbox" id="fake-toggle-2" />
       Use Fake Mode (debug)
@@ -65,13 +65,12 @@
     <p id="error-message"></p>
     <button id="btn-error-back" class="primary-btn">Try Again</button>
 
-    <!-- Fake toggle lives on all screens -->
     <label class="fake-toggle">
       <input type="checkbox" id="fake-toggle-3" />
       Use Fake Mode (debug)
     </label>
   </div>
 
-  <script type="module" src="script.js?v=1"></script>
+  <script type="module" src="script.js?v=2"></script>
 </body>
 </html>
