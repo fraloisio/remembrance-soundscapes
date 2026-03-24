@@ -41,6 +41,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const errorMessage = document.getElementById("error-message");
   const loadingText  = document.getElementById("loading-text");
   const queueStatus  = document.getElementById("queue-status");
+  const progressBar  = document.getElementById("progress-bar");
 
   // ——————————————————————————
   // Screen management
@@ -143,9 +144,11 @@ document.addEventListener("DOMContentLoaded", () => {
             const pos = s.position;
             queueStatus.textContent = pos === 0 ? "Next in line" : `${pos} ${pos === 1 ? "person" : "people"} ahead of you`;
             loadingText.innerHTML = "Your image is in the queue.<br>Sound will begin soon.";
+            progressBar.classList.remove("active");
           } else {
             queueStatus.textContent = "";
             loadingText.innerHTML = "Listening to your image.<br>Translating memory into sound.";
+            progressBar.classList.add("active");
           }
         } else if (msg.type === "data") {
           [audioRes, metaRes] = msg.data;

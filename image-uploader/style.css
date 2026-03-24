@@ -219,6 +219,32 @@ p.subtitle {
   display: none;
 }
 
+.progress-bar {
+  width: 100%;
+  height: 1px;
+  background: var(--border);
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+
+.progress-bar.active {
+  opacity: 1;
+}
+
+.progress-fill {
+  height: 100%;
+  width: 35%;
+  background: var(--muted);
+  transform: translateX(-100%);
+  animation: progress-scan 1.8s ease-in-out infinite;
+}
+
+@keyframes progress-scan {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(386%); }
+}
+
 /* ==============================
    SUCCESS SCREEN
    ============================== */
