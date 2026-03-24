@@ -1,0 +1,9 @@
+ID: 2
+TITLE: Whispering Map of Lost Connections
+TIMESTAMP (UTC): 20260324-134858
+
+ANALYSIS:
+A collage-style map on textured brown paper features torn paper labels with Danish phrases like “Følg de stiplede linjer” and “I Danmark,” alongside whimsical illustrations such as cartoon eyes, airplane silhouettes, and abstract green landforms. Words like “ked,” “rasende,” and “død” are scattered across red and green shapes, evoking emotion and movement. The composition feels handcrafted and fragmented, suggesting a personal or emotional journey.
+
+LONG PROMPT:
+Design an ambient, layered soundscape that drifts between melancholic whispers, distant mechanical hums, and rhythmic paper-like textures — evoking a journey across emotional terrain, with spatial cues that pull the listener toward and away from unresolved destinations.
