@@ -1,0 +1,9 @@
+ID: 1
+TITLE: Red Stick Figure Under Nazi Shadow
+TIMESTAMP (UTC): 20260324-153718
+
+ANALYSIS:
+A red stick figure stands beside a small portrait of a bearded man, while a grayscale silhouette of a man in uniform looms over them. A red banner above reads “Hvordan tror du, det føles at være ung under en krig?” with faint, partially erased handwriting. The composition is layered on a textured, beige surface, suggesting a collage or mixed-media artwork.
+
+LONG PROMPT:
+Design a soundscape with the rhythmic scrape of a pencil on paper, interspersed with distant, muffled footsteps and a low, ominous drone, all layered over a childlike, hollow whisper that fades into silence.
