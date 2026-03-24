@@ -1,0 +1,9 @@
+ID: 16
+TITLE: Time Stilled by the Gun
+TIMESTAMP (UTC): 20260324-144031
+
+ANALYSIS:
+A silhouette of a soldier holding a rifle faces a crossed-out clock, symbolizing halted time. Above, fragmented text reads “tiden står stille” (Norwegian for “time stands still”), while a speech bubble on the right contains “Fremtiden” (future) and a scribbled note. The composition uses torn paper textures and muted tones, conveying a stark, contemplative atmosphere.
+
+LONG PROMPT:
+Design a tense, spatial soundscape where a muted heartbeat and distant rifle clicks slowly fade into silence, punctuated by a sudden, echoing metallic clang that dissolves into ambient static — evoking a frozen moment before an uncertain future.
