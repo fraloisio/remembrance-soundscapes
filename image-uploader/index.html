@@ -49,9 +49,23 @@
     </div>
   </div>
 
+  <!-- SVG filter for organic blob shape -->
+  <svg width="0" height="0" style="position:absolute;overflow:hidden">
+    <defs>
+      <filter id="organic-blob" x="-20%" y="-20%" width="140%" height="140%">
+        <feTurbulence type="turbulence" baseFrequency="0.014" numOctaves="3" seed="7" result="noise"/>
+        <feDisplacementMap in="SourceGraphic" in2="noise" scale="16" xChannelSelector="R" yChannelSelector="G"/>
+      </filter>
+    </defs>
+  </svg>
+
   <!-- SUCCESS SCREEN -->
   <div id="screen-success" class="screen">
-    <img id="output-image" src="" class="circle-image" alt="" />
+    <div class="blob-wrapper">
+      <div class="circle-clip">
+        <img id="output-image" src="" alt="" />
+      </div>
+    </div>
     <h2 id="title-text"></h2>
     <audio id="audio-player" controls></audio>
     <button id="btn-back" class="primary-btn">Generate Another</button>
