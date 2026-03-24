@@ -1,0 +1,9 @@
+ID: 14
+TITLE: Shattered Voices in a War of Words
+TIMESTAMP (UTC): 20260324-143106
+
+ANALYSIS:
+A collage of torn paper fragments with handwritten Danish phrases like “HÅRDT,” “Krigen i en,” and “fremmede folk,” layered over red cutouts with crude stick figures and symbols. The composition feels chaotic, with arrows pointing to concepts and fragmented text scattered across a textured, neutral background.
+
+LONG PROMPT:
+Design a layered, dissonant soundscape where fragmented voices echo in overlapping, broken phrases, punctuated by rhythmic metallic scrapes and distant, distorted footsteps—evoking a battlefield of words where meaning fractures and reassembles in spatial chaos.
