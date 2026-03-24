@@ -758,6 +758,7 @@
     // KEYBOARD HANDLER
     // ==============================
     document.addEventListener('keydown', e => {
+      if (e.repeat) return;
       if (e.key === ' ') {
         e.preventDefault();
         const sorted = orderedBubbles();
@@ -771,8 +772,13 @@
       const bubble = getBubbleForKey(e.key);
       if (bubble) {
         e.preventDefault();
-        bubble.setExpanded(!bubble.expanded);
+        bubble.setExpanded(true);
       }
+    });
+
+    document.addEventListener('keyup', e => {
+      const bubble = getBubbleForKey(e.key);
+      if (bubble) bubble.setExpanded(false);
     });
 
     // ==============================
