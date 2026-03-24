@@ -137,10 +137,29 @@ document.addEventListener("DOMContentLoaded", () => {
       const job = client.submit("/pipeline_from_image", [file]);
 
       let audioRes, metaRes;
+      let processingStart = null;
+      let elapsedTimer = null;
+
+      function startElapsedTimer() {
+        processingStart = Date.now();
+        elapsedTimer = setInterval(() => {
+          const elapsed = Math.floor((Date.now() - processingStart) / 1000);
+          const mins = Math.floor(elapsed / 60);
+          const secs = elapsed % 60;
+          const elapsedStr = mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
+          loadingText.innerHTML = `Listening to your image.<br>Translating memory into sound.<br><span style="opacity:0.5">${elapsedStr}</span>`;
+        }, 1000);
+      }
+
+      function stopElapsedTimer() {
+        if (elapsedTimer) { clearInterval(elapsedTimer); elapsedTimer = null; }
+      }
+
       for await (const msg of job) {
         if (msg.type === "status") {
           const s = msg.data;
           if (s.status === "in_queue" && s.position != null) {
+            stopElapsedTimer();
             const pos = s.position;
             queueStatus.textContent = pos === 0 ? "Next in line" : `${pos} ${pos === 1 ? "person" : "people"} ahead of you`;
             if (s.eta != null && s.eta > 0) {
@@ -154,14 +173,16 @@ document.addEventListener("DOMContentLoaded", () => {
             progressBar.classList.remove("active");
           } else {
             queueStatus.textContent = "";
-            loadingText.innerHTML = "Listening to your image.<br>Translating memory into sound.";
+            if (!processingStart) startElapsedTimer();
             progressBar.classList.add("active");
           }
         } else if (msg.type === "data") {
           [audioRes, metaRes] = msg.data;
+          stopElapsedTimer();
           break;
         }
       }
+      stopElapsedTimer();
       const audioUrl    = audioRes?.url || audioRes?.path || "";
       const metadataUrl = metaRes?.url  || metaRes?.path  || "";
 
@@ -174,6 +195,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       show(screenSuccess);
     } catch (err) {
+      stopElapsedTimer();
       console.error("Generation failed", err);
       errorMessage.textContent = err?.message || "Unknown error";
       show(screenError);
