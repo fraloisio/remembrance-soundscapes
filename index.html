@@ -19,53 +19,6 @@
       inset: 0;
     }
     /* Subtle grain overlay via SVG turbulence — no JS cost */
-    /* Demo switch */
-    #demo-checkbox { display: none; }
-    #demo-switch {
-      position: fixed;
-      bottom: 1.4rem;
-      right: 1.6rem;
-      display: flex;
-      align-items: center;
-      gap: 0.55rem;
-      z-index: 100;
-      opacity: 0.3;
-      transition: opacity 0.2s;
-      cursor: pointer;
-      user-select: none;
-    }
-    #demo-switch:hover { opacity: 0.85; }
-    #demo-checkbox:checked ~ #demo-switch { opacity: 0.85; }
-    #demo-switch span {
-      font-family: 'Jost', sans-serif;
-      font-size: 0.58rem;
-      font-weight: 200;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      color: #e8d7be;
-    }
-    .toggle-pill {
-      width: 26px;
-      height: 13px;
-      border-radius: 7px;
-      border: 1px solid rgba(232,215,190,0.35);
-      position: relative;
-      transition: border-color 0.2s;
-    }
-    .toggle-pill::after {
-      content: '';
-      position: absolute;
-      left: 2px; top: 2px;
-      width: 7px; height: 7px;
-      border-radius: 50%;
-      background: rgba(232,215,190,0.45);
-      transition: transform 0.2s, background 0.2s;
-    }
-    #demo-checkbox:checked ~ #demo-switch .toggle-pill { border-color: rgba(232,215,190,0.8); }
-    #demo-checkbox:checked ~ #demo-switch .toggle-pill::after {
-      transform: translateX(13px);
-      background: rgba(232,215,190,1);
-    }
     #memories-count {
       position: fixed;
       bottom: 1.55rem;
@@ -118,12 +71,7 @@
     <span class="brand">Hope &amp; Despair</span>
     <span class="tagline">What does a memorial visit sound like?</span>
   </div>
-  <input type="checkbox" id="demo-checkbox">
   <div id="memories-count"></div>
-  <label for="demo-checkbox" id="demo-switch">
-    <span>Demo</span>
-    <div class="toggle-pill"></div>
-  </label>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.3/p5.min.js"></script>
 
@@ -594,7 +542,6 @@
     // ==============================
     // DATA MANAGER
     // ==============================
-    let demoActive = false;
     let lastFetchedRecords = {};
 
     const DataManager = {
@@ -606,7 +553,7 @@
           const text = await response.text();
           const rows = CSVParser.parse(text);
           lastFetchedRecords = this.transformRows(rows);
-          if (!demoActive) this.syncBubbles(lastFetchedRecords);
+          this.syncBubbles(lastFetchedRecords);
           const n = Object.keys(lastFetchedRecords).length;
           const el = document.getElementById("memories-count");
           if (el) el.textContent = `${n} ${n === 1 ? "soundscape" : "soundscapes"}`;
@@ -783,56 +730,6 @@
       p.mousePressed  = () => InteractionHandler.onMousePressed(p);
       p.mouseDragged  = () => InteractionHandler.onMouseDragged(p);
       p.mouseReleased = () => InteractionHandler.onMouseReleased(p);
-    });
-
-    // ==============================
-    // DEMO MODE
-    // ==============================
-    const DEMO_RECORDS = Array.from({ length: 18 }, (_, i) => ({
-      id:          `demo-${i + 1}`,
-      title:       "",
-      imageUrl:    `images/Page${i + 1}.png`,
-      audioUrl:    "",
-      textUrl:     "",
-      description: ""
-    }));
-
-    function activateDemoMode() {
-      demoActive = true;
-      state.bubbles.forEach(b => b.cleanup());
-      state.bubbles = [];
-      state.bubblesById = {};
-
-      // Grab audio/text/title from real records, shuffle, assign round-robin
-      const pool = Object.values(lastFetchedRecords)
-        .filter(r => r.audioUrl || r.textUrl)
-        .sort(() => Math.random() - 0.5);
-
-      DEMO_RECORDS.forEach((rec, i) => {
-        const src = pool.length ? pool[i % pool.length] : {};
-        const bubble = new Bubble({
-          ...rec,
-          audioUrl:    src.audioUrl    || "",
-          textUrl:     src.textUrl     || "",
-          title:       src.title       || "",
-          timestamp:   src.timestamp   || "",
-          description: src.description || ""
-        });
-        state.bubbles.push(bubble);
-        state.bubblesById[rec.id] = bubble;
-      });
-    }
-
-    function deactivateDemoMode() {
-      demoActive = false;
-      state.bubbles.forEach(b => b.cleanup());
-      state.bubbles = [];
-      state.bubblesById = {};
-      DataManager.syncBubbles(lastFetchedRecords);
-    }
-
-    document.getElementById("demo-checkbox").addEventListener("change", e => {
-      e.target.checked ? activateDemoMode() : deactivateDemoMode();
     });
   </script>
 </body>

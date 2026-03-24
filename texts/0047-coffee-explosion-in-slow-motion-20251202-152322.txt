@@ -1,9 +1,0 @@
-ID: 47
-TITLE: Coffee Explosion in Slow Motion
-TIMESTAMP (UTC): 20251202-152322
-
-ANALYSIS:
-A white enamel mug sits on a wooden table as dark liquid violently splashes upward and outward, droplets suspended mid-air. Beside it rests a plate of assorted pastries and a glass jar filled with coffee beans, with a spoon lying nearby. The background is softly blurred wood paneling, emphasizing the chaotic motion of the splash.
-
-LONG PROMPT:
-Design a rich, textured audio moment where a thick, viscous liquid erupts with a sharp, resonant splash, followed by rapid, wet droplets pattering and splattering across surfaces, layered with a low, rumbling bass that pulses with the impact, all spatially centered with a subtle ambient warmth from a nearby ceramic object and distant wooden textures.

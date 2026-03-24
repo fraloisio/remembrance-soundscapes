@@ -1,9 +1,0 @@
-ID: 5
-TITLE: Hands Locked in Silent Struggle
-TIMESTAMP (UTC): 20260324-135336
-
-ANALYSIS:
-Two men are engaged in arm wrestling, captured in a grainy black-and-white photo. Their faces show concentration and exertion as they strain against each other. The composition isolates them against a plain background, with a fragmented text overlay at the bottom reading “hårdt men nyt sammenhold.”
-
-LONG PROMPT:
-Design a tense, rhythmic soundscape with the low grumble of muscle straining, punctuated by subtle metallic clicks and fabric rustles as hands grip and shift, evolving into a breathy, shared exhale that implies connection despite the struggle.
