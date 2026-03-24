@@ -1,0 +1,9 @@
+ID: 11
+TITLE: Whispering Walls of Labor and Madness
+TIMESTAMP (UTC): 20260324-142410
+
+ANALYSIS:
+A collage-like surface features Danish text including “alt for meget hardt Arbejde” (too much hard work) and “Tøj” (clothing), alongside crude drawings of a carrot and a human silhouette. Overlaid are torn paper fragments with “MAD” and a blue spray-paint cross. Three faded photographic faces hover above in a thought bubble. The composition suggests layered, chaotic urban expression.
+
+LONG PROMPT:
+Design an immersive, layered soundscape where rhythmic scraping and distant whispers evoke worn walls, punctuated by a sudden burst of distorted static and a low, resonant hum that shifts in pitch—like a city exhaling fatigue, then swallowing it whole with a metallic clang.
