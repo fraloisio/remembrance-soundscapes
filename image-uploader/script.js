@@ -143,7 +143,14 @@ document.addEventListener("DOMContentLoaded", () => {
           if (s.status === "in_queue" && s.position != null) {
             const pos = s.position;
             queueStatus.textContent = pos === 0 ? "Next in line" : `${pos} ${pos === 1 ? "person" : "people"} ahead of you`;
-            loadingText.innerHTML = "Your image is in the queue.<br>Sound will begin soon.";
+            if (s.eta != null && s.eta > 0) {
+              const mins = Math.floor(s.eta / 60);
+              const secs = Math.round(s.eta % 60);
+              const etaStr = mins > 0 ? `~${mins}m ${secs}s` : `~${secs}s`;
+              loadingText.innerHTML = `Your image is in the queue.<br>Expected wait: ${etaStr}.`;
+            } else {
+              loadingText.innerHTML = "Your image is in the queue.<br>Sound will begin soon.";
+            }
             progressBar.classList.remove("active");
           } else {
             queueStatus.textContent = "";

@@ -83,7 +83,9 @@
       USE_LOCAL: false,
       CSV_URL: "https://raw.githubusercontent.com/fraloisio/sonic-runs-assets/refs/heads/main/records.csv",
       LOCAL_CSV: "./records.csv",
-      REFRESH_INTERVAL_MS: 30_000,
+      REFRESH_INTERVAL_MS: 8_000,
+      PENDING_URL: "https://raw.githubusercontent.com/fraloisio/sonic-runs-assets/refs/heads/main/pending.json",
+      PENDING_MAX_AGE_MS: 600_000,
       BASE_RADIUS_MIN: 12,
       BASE_RADIUS_MAX: 42,
       EXPANDED_RADIUS: 220,
@@ -112,6 +114,7 @@
     const state = {
       bubbles: [],
       bubblesById: {},
+      ghostBubbles: [],
       p5Instance: null,
       drag: { target: null, offsetX: 0, offsetY: 0, moved: false, startX: 0, startY: 0 }
     };
@@ -614,6 +617,38 @@
           }
         }
         console.log(`Synced bubbles: ${state.bubbles.length}`);
+      },
+
+      async fetchPending() {
+        try {
+          const resp = await fetch(`${CONFIG.PENDING_URL}?t=${Date.now()}`);
+          if (!resp.ok) { this.syncGhosts(0); return; }
+          const entries = await resp.json();
+          const now = Date.now();
+          const active = entries.filter(e => now - new Date(e.started).getTime() < CONFIG.PENDING_MAX_AGE_MS);
+          this.syncGhosts(active.length);
+        } catch {
+          this.syncGhosts(0);
+        }
+      },
+
+      syncGhosts(count) {
+        if (state.ghostBubbles.length === count) return;
+        // Rebuild ghost array with top-of-screen positions
+        state.ghostBubbles = Array.from({ length: count }, (_, i) => {
+          const spread = window.innerWidth / (count + 1);
+          return {
+            x: spread * (i + 1),
+            y: randomRange(55, 100),
+            shapeOffset: Math.random() * 500,
+            breathPhase: Math.random() * Math.PI * 2,
+            breathSpeed: 0.007,
+            breathAmt: 3,
+            baseRadius: 30,
+            radius: 30,
+            blinkPhase: Math.random() * Math.PI * 2
+          };
+        });
       }
     };
 
@@ -680,7 +715,8 @@
         p.frameRate(60);
         p.textFont('Jost');
         DataManager.fetchRecords();
-        setInterval(() => DataManager.fetchRecords(), CONFIG.REFRESH_INTERVAL_MS);
+        DataManager.fetchPending();
+        setInterval(() => { DataManager.fetchRecords(); DataManager.fetchPending(); }, CONFIG.REFRESH_INTERVAL_MS);
       };
 
       p.windowResized = () => {
@@ -717,8 +753,63 @@
           p.noTint();
         }
 
+        // Ghost spotlights for pending generations
+        state.ghostBubbles.forEach(g => {
+          g.breathPhase += g.breathSpeed;
+          g.blinkPhase  += 0.018;
+          g.radius = g.baseRadius + Math.sin(g.breathPhase) * g.breathAmt;
+
+          const ctx = p.drawingContext;
+          const prev = ctx.globalCompositeOperation;
+          ctx.globalCompositeOperation = 'lighter';
+          const spotR = g.radius * 4;
+          const [or, og, ob] = CONFIG.OLIVE;
+          const a = (0.12 + Math.sin(g.blinkPhase) * 0.06);
+          const grad = ctx.createRadialGradient(g.x, g.y, g.radius * 0.1, g.x, g.y, spotR);
+          grad.addColorStop(0,   `rgba(${or},${og},${ob},${a})`);
+          grad.addColorStop(1,   `rgba(${or},${og},${ob},0)`);
+          ctx.fillStyle = grad;
+          ctx.beginPath(); ctx.arc(g.x, g.y, spotR, 0, Math.PI * 2); ctx.fill();
+          ctx.globalCompositeOperation = prev;
+        });
+
         // Draw bubble circles with MULTIPLY — white backgrounds disappear into the scene
         state.bubbles.forEach(bubble => bubble.drawCircle(p));
+
+        // Ghost bubble circles
+        state.ghostBubbles.forEach(g => {
+          p.push();
+          p.translate(g.x, g.y);
+          const ctx = p.drawingContext;
+          ctx.save();
+          const steps = 48;
+          ctx.beginPath();
+          for (let i = 0; i <= steps; i++) {
+            const angle = (i / steps) * Math.PI * 2;
+            const n = p.noise(Math.cos(angle) * 0.9 + g.shapeOffset, Math.sin(angle) * 0.9 + g.shapeOffset + 200);
+            const rad = g.radius + (n - 0.5) * g.radius * 0.22;
+            const px = Math.cos(angle) * rad, py = Math.sin(angle) * rad;
+            if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+          }
+          ctx.closePath();
+          const alpha = 0.12 + Math.sin(g.blinkPhase) * 0.08;
+          ctx.fillStyle = `rgba(232,215,190,${alpha})`;
+          ctx.fill();
+          ctx.strokeStyle = `rgba(232,215,190,${alpha + 0.08})`;
+          ctx.lineWidth = 1;
+          ctx.stroke();
+          ctx.restore();
+          p.pop();
+
+          // "Generating…" label beneath
+          const [cr, cg, cb] = CONFIG.CREAM;
+          p.fill(cr, cg, cb, Math.floor((0.12 + Math.sin(g.blinkPhase) * 0.08) * 255));
+          p.noStroke();
+          p.textSize(7);
+          p.textStyle(p.NORMAL);
+          p.textAlign(p.CENTER, p.TOP);
+          p.text("GENERATING", g.x, g.y + g.radius + 6);
+        });
 
         // Labels on top
         state.bubbles.forEach(bubble => {
