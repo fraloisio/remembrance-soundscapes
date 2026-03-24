@@ -725,6 +725,19 @@
           if (bubble.expanded) bubble.drawLabel(p);
           else bubble.drawTimestamp(p);
         });
+
+        // Empty state message
+        if (state.bubbles.length === 0) {
+          const [cr, cg, cb] = CONFIG.CREAM;
+          p.noStroke();
+          p.fill(cr, cg, cb, 80);
+          p.textSize(11);
+          p.textStyle(p.NORMAL);
+          p.textAlign(p.CENTER, p.CENTER);
+          p.textLeading(22);
+          p.text("WAITING FOR THE FIRST VOICE", p.width / 2, p.height / 2);
+          p.textAlign(p.LEFT, p.BASELINE);
+        }
       };
 
       p.mousePressed  = () => InteractionHandler.onMousePressed(p);
