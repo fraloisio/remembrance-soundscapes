@@ -125,6 +125,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Generate
   // ——————————————————————————
   btnGenerate.addEventListener("click", async () => {
+    console.log("--- GENERATE CLICKED ---");
     const file = selectedFile;
     if (!file) return;
 
@@ -138,6 +139,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       let audioRes, metaRes;
       for await (const msg of job) {
+        console.log("MSG:", JSON.stringify(msg));
         if (msg.type === "status") {
           const s = msg.data;
           if (s.status === "in_queue" && s.position != null) {
@@ -152,8 +154,10 @@ document.addEventListener("DOMContentLoaded", () => {
           }
         } else if (msg.type === "data") {
           [audioRes, metaRes] = msg.data;
+          break;
         }
       }
+      console.log("audioRes:", audioRes, "metaRes:", metaRes);
       const audioUrl    = audioRes?.url || audioRes?.path || "";
       const metadataUrl = metaRes?.url  || metaRes?.path  || "";
 
