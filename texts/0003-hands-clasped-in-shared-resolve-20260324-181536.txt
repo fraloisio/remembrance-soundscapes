@@ -1,0 +1,9 @@
+ID: 3
+TITLE: Hands Clasped in Shared Resolve
+TIMESTAMP (UTC): 20260324-181536
+
+ANALYSIS:
+Two individuals are seated facing each other, hands clasped in a gesture of collaboration or solidarity. Their expressions suggest focus and mutual effort. The image is a black-and-white collage with torn-paper lettering at the bottom reading “hårdt men nyt sammenhold,” implying resilience and unity. The background is a plain, textured beige surface.
+
+LONG PROMPT:
+Design a spatial audio scene where two voices—one youthful, one seasoned—overlap in rhythmic syncopation, as if sharing a silent pact; layer in the soft, gritty texture of tearing paper and a low, resonant hum that pulses like steady breaths, grounding the moment in tactile warmth and quiet determination.
