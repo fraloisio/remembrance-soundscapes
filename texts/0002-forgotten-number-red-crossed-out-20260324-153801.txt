@@ -1,0 +1,9 @@
+ID: 2
+TITLE: Forgotten Number, Red Crossed Out
+TIMESTAMP (UTC): 20260324-153801
+
+ANALYSIS:
+A black-and-white cutout of a man in uniform holding papers labeled “115” sits against a beige background. Above him, a red banner holds green text fragments reading “Hvorfor?”, “Fremtiden”, and “drab”. Small red X’s mark a tree, a house, and a bird-like shape. The overall composition feels collage-like, with layered textures and symbolic elements.
+
+LONG PROMPT:
+Design a layered soundscape with gritty paper rustle, a distant ticking clock, a muted choir humming “Fremtiden,” and sudden, sharp red X-sound cuts — spatially panning across a hollow, echoing room with decaying textures and a creeping sense of erased memory.
