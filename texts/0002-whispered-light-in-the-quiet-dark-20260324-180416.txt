@@ -1,0 +1,9 @@
+ID: 2
+TITLE: Whispered Light in the Quiet Dark
+TIMESTAMP (UTC): 20260324-180416
+
+ANALYSIS:
+A vintage collage shows a person hunched over, absorbed in work, beside a simple candle illustration. Handwritten Danish phrases float in corners — “Hvorfor lige mig!” and “Lyset for enden af vejen.” The composition feels intimate, textured, and emotionally layered, suggesting solitude or contemplation.
+
+LONG PROMPT:
+Design a quiet, textured soundscape with a slow heartbeat rhythm and a distant, flickering candle flame — warm, organic, and slightly uncertain — that grows fainter as if carried away by breath or wind, all wrapped in a reverent, acoustic silence.
