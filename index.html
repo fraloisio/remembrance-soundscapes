@@ -348,7 +348,10 @@
 
         // Scale intensity with bubble size — small bubbles glow faintly, expanded = full
         const sizeRatio = Math.pow(this.radius / CONFIG.EXPANDED_RADIUS, 0.7);
-        const alpha = CONFIG.SPOTLIGHT_ALPHA * sizeRatio * (this.expanded ? 1.15 : 1.0);
+        // Boost glow when there are few bubbles so the canvas doesn't look too dark
+        const totalBubbles = Math.max(1, state.bubbles.length + state.ghostBubbles.length);
+        const scarcityBoost = Math.min(4.0, Math.pow(15 / totalBubbles, 0.6));
+        const alpha = CONFIG.SPOTLIGHT_ALPHA * sizeRatio * (this.expanded ? 1.15 : 1.0) * scarcityBoost;
 
         const grad = ctx.createRadialGradient(0, 0, this.radius * 0.1, 0, 0, spotR);
         grad.addColorStop(0,    `rgba(${or},${og},${ob},${alpha})`);
