@@ -180,19 +180,20 @@
     const KEYS_PER_PAGE = 12;
 
     // 12 unique colors — one per key slot, consistent across pages
+    // Full color wheel spread (~30° apart) for maximum perceptual contrast
     const KEY_COLORS = [
-      [220,  88,  76],  // W  — dusty red
-      [230, 152,  50],  // A  — amber
-      [185, 210,  65],  // S  — lime
-      [ 85, 185,  98],  // D  — leaf green
-      [ 50, 188, 186],  // F  — teal
-      [ 78, 128, 210],  // G  — cornflower blue
-      [150,  80, 210],  // Z  — violet
-      [215,  78, 162],  // X  — rose
-      [235, 122,  65],  // C  — burnt orange
-      [ 82, 198, 162],  // V  — seafoam
-      [198, 182,  55],  // B  — gold
-      [162, 108, 215],  // N  — lavender
+      [225,  55,  55],  // W  — red
+      [230, 125,  35],  // A  — orange
+      [210, 195,  30],  // S  — yellow
+      [130, 210,  40],  // D  — chartreuse
+      [ 40, 185,  70],  // F  — green
+      [ 30, 190, 170],  // G  — teal
+      [ 35, 160, 220],  // Z  — sky blue
+      [ 55,  85, 210],  // X  — royal blue
+      [130,  50, 205],  // C  — purple
+      [210,  50, 180],  // V  — magenta
+      [220,  55, 105],  // B  — crimson
+      [190, 150,  35],  // N  — gold
     ];
     let currentPage = 0;
 
