@@ -202,6 +202,21 @@ p.subtitle {
   line-height: 1.8;
   margin: 0;
   max-width: 300px;
+  transition: opacity 0.4s;
+}
+
+.queue-status {
+  font-size: 0.68rem;
+  font-weight: 200;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(232, 223, 200, 0.3);
+  margin: 0;
+  min-height: 1em;
+}
+
+.queue-status:empty {
+  display: none;
 }
 
 /* ==============================

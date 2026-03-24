@@ -39,6 +39,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const metadataLink = document.getElementById("metadata-link");
   const titleText    = document.getElementById("title-text");
   const errorMessage = document.getElementById("error-message");
+  const loadingText  = document.getElementById("loading-text");
+  const queueStatus  = document.getElementById("queue-status");
 
   // ——————————————————————————
   // Screen management
@@ -131,8 +133,24 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       const HF_SPACE = "Hope-and-Despair/Stable-Audio-freestyle-new-experiments";
       const client = await Client.connect(HF_SPACE);
-      const result = await client.predict("/pipeline_from_image", [file]);
+      const job = client.submit("/pipeline_from_image", [file]);
 
+      job.on("status", (status) => {
+        if (status.queue && status.position != null) {
+          const pos = status.position;
+          if (pos === 0) {
+            queueStatus.textContent = "Next in line";
+          } else {
+            queueStatus.textContent = `${pos} ${pos === 1 ? "person" : "people"} ahead of you`;
+          }
+          loadingText.innerHTML = "Your image is in the queue.<br>Sound will begin soon.";
+        } else {
+          queueStatus.textContent = "";
+          loadingText.innerHTML = "Listening to your image.<br>Translating memory into sound.";
+        }
+      });
+
+      const result = await job;
       const [audioRes, metaRes] = result.data;
       const audioUrl    = audioRes.url || audioRes.path || "";
       const metadataUrl = metaRes.url  || metaRes.path  || "";
