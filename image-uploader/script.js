@@ -135,25 +135,24 @@ document.addEventListener("DOMContentLoaded", () => {
       const client = await Client.connect(HF_SPACE);
       const job = client.submit("/pipeline_from_image", [file]);
 
-      job.on("status", (status) => {
-        if (status.queue && status.position != null) {
-          const pos = status.position;
-          if (pos === 0) {
-            queueStatus.textContent = "Next in line";
+      let audioRes, metaRes;
+      for await (const msg of job) {
+        if (msg.type === "status") {
+          const s = msg.data;
+          if (s.status === "in_queue" && s.position != null) {
+            const pos = s.position;
+            queueStatus.textContent = pos === 0 ? "Next in line" : `${pos} ${pos === 1 ? "person" : "people"} ahead of you`;
+            loadingText.innerHTML = "Your image is in the queue.<br>Sound will begin soon.";
           } else {
-            queueStatus.textContent = `${pos} ${pos === 1 ? "person" : "people"} ahead of you`;
+            queueStatus.textContent = "";
+            loadingText.innerHTML = "Listening to your image.<br>Translating memory into sound.";
           }
-          loadingText.innerHTML = "Your image is in the queue.<br>Sound will begin soon.";
-        } else {
-          queueStatus.textContent = "";
-          loadingText.innerHTML = "Listening to your image.<br>Translating memory into sound.";
+        } else if (msg.type === "data") {
+          [audioRes, metaRes] = msg.data;
         }
-      });
-
-      const result = await job;
-      const [audioRes, metaRes] = result.data;
-      const audioUrl    = audioRes.url || audioRes.path || "";
-      const metadataUrl = metaRes.url  || metaRes.path  || "";
+      }
+      const audioUrl    = audioRes?.url || audioRes?.path || "";
+      const metadataUrl = metaRes?.url  || metaRes?.path  || "";
 
       outputImage.src    = URL.createObjectURL(file);
       audioPlayer.src    = audioUrl;
