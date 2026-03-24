@@ -73,7 +73,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 0.28rem;
+      gap: 0.35rem;
       pointer-events: none;
     }
     #page-indicator {
@@ -86,31 +86,21 @@
     }
     .key-row {
       display: flex;
-      gap: 0.22rem;
+      gap: 0.38rem;
     }
-    .key {
-      width: 20px;
-      height: 20px;
-      border: 1px solid rgba(232, 215, 190, 0.15);
-      border-radius: 2px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: 'Jost', sans-serif;
-      font-size: 0.48rem;
-      font-weight: 400;
-      letter-spacing: 0.08em;
-      color: rgba(232, 215, 190, 0.25);
-      transition: border-color 0.2s, color 0.2s, background 0.15s;
+    .key-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      transition: opacity 0.2s, transform 0.15s;
+      opacity: 0.12;
     }
-    .key.has-bubble {
-      border-color: rgba(232, 215, 190, 0.28);
-      color: rgba(232, 215, 190, 0.5);
+    .key-dot.has-bubble {
+      opacity: 0.45;
     }
-    .key.active {
-      border-color: rgba(232, 215, 190, 0.75);
-      color: rgba(232, 215, 190, 0.95);
-      background: rgba(232, 215, 190, 0.07);
+    .key-dot.active {
+      opacity: 1;
+      transform: scale(1.5);
     }
     #space-hint {
       font-size: 0.4rem;
@@ -133,20 +123,20 @@
   <div id="keyboard-legend">
     <div id="page-indicator"></div>
     <div class="key-row">
-      <div class="key" id="key-w">W</div>
-      <div class="key" id="key-a">A</div>
-      <div class="key" id="key-s">S</div>
-      <div class="key" id="key-d">D</div>
-      <div class="key" id="key-f">F</div>
-      <div class="key" id="key-g">G</div>
+      <div class="key-dot" id="key-w"></div>
+      <div class="key-dot" id="key-a"></div>
+      <div class="key-dot" id="key-s"></div>
+      <div class="key-dot" id="key-d"></div>
+      <div class="key-dot" id="key-f"></div>
+      <div class="key-dot" id="key-g"></div>
     </div>
     <div class="key-row">
-      <div class="key" id="key-z">Z</div>
-      <div class="key" id="key-x">X</div>
-      <div class="key" id="key-c">C</div>
-      <div class="key" id="key-v">V</div>
-      <div class="key" id="key-b">B</div>
-      <div class="key" id="key-n">N</div>
+      <div class="key-dot" id="key-z"></div>
+      <div class="key-dot" id="key-x"></div>
+      <div class="key-dot" id="key-c"></div>
+      <div class="key-dot" id="key-v"></div>
+      <div class="key-dot" id="key-b"></div>
+      <div class="key-dot" id="key-n"></div>
     </div>
     <div id="space-hint"></div>
   </div>
@@ -188,6 +178,22 @@
     // ==============================
     const KEY_ORDER = ['w','a','s','d','f','g','z','x','c','v','b','n'];
     const KEYS_PER_PAGE = 12;
+
+    // 12 unique colors — one per key slot, consistent across pages
+    const KEY_COLORS = [
+      [220,  88,  76],  // W  — dusty red
+      [230, 152,  50],  // A  — amber
+      [185, 210,  65],  // S  — lime
+      [ 85, 185,  98],  // D  — leaf green
+      [ 50, 188, 186],  // F  — teal
+      [ 78, 128, 210],  // G  — cornflower blue
+      [150,  80, 210],  // Z  — violet
+      [215,  78, 162],  // X  — rose
+      [235, 122,  65],  // C  — burnt orange
+      [ 82, 198, 162],  // V  — seafoam
+      [198, 182,  55],  // B  — gold
+      [162, 108, 215],  // N  — lavender
+    ];
     let currentPage = 0;
 
     // Returns bubbles sorted stably by numeric ID — used for key mapping
@@ -234,17 +240,19 @@
       const spaceHint = document.getElementById('space-hint');
       spaceHint.textContent = totalPages > 1 ? 'SPACE — switch page' : '';
 
-      // Key states
+      // Dot states
       KEY_ORDER.forEach((key, i) => {
         const el = document.getElementById(`key-${key}`);
         if (!el) return;
+        const [r, g, b] = KEY_COLORS[i];
+        el.style.backgroundColor = `rgb(${r},${g},${b})`;
         const bubble = sorted[currentPage * KEYS_PER_PAGE + i];
         if (!bubble) {
-          el.className = 'key';
+          el.className = 'key-dot';
         } else if (bubble.expanded) {
-          el.className = 'key active';
+          el.className = 'key-dot active';
         } else {
-          el.className = 'key has-bubble';
+          el.className = 'key-dot has-bubble';
         }
       });
     }
@@ -533,11 +541,10 @@
         p.text(this.title.toUpperCase(), this.x, this.y + this.radius + 14);
       }
 
-      drawTimestamp(p) {
+      drawTimestamp(p, color, isCurrentPage) {
         if (!this.timestamp) return;
         p.blendMode(p.BLEND);
         const [cr, cg, cb] = CONFIG.CREAM;
-        p.fill(cr, cg, cb, 178);
         p.noStroke();
         p.textFont('Jost');
         p.textSize(8);
@@ -548,20 +555,29 @@
           ? new Date(+m[1], +m[2]-1, +m[3], +m[4], +m[5])
               .toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }) + '  |  ' + `${m[4]}:${m[5]}`
           : this.timestamp;
-        p.text(label, this.x, this.y + this.radius + 6);
+        const textY = this.y + this.radius + 6;
+        // Colored dot left of date
+        if (color) {
+          const tw = p.textWidth(label);
+          const [r, g, b] = color;
+          const dotAlpha = isCurrentPage !== false ? 210 : 65;
+          p.fill(r, g, b, dotAlpha);
+          p.circle(this.x - tw / 2 - 7, textY + 4, 5);
+        }
+        p.fill(cr, cg, cb, 178);
+        p.text(label, this.x, textY);
       }
 
-      drawKeyLabel(p, keyLetter, isCurrentPage) {
+      drawKeyDot(p, color, isCurrentPage) {
+        p.push();
         p.blendMode(p.BLEND);
-        const [cr, cg, cb] = CONFIG.CREAM;
-        const alpha = isCurrentPage ? (this.expanded ? 220 : 130) : 35;
-        p.fill(cr, cg, cb, alpha);
+        const [r, g, b] = color;
+        const alpha = isCurrentPage ? (this.expanded ? 255 : 185) : 38;
+        p.fill(r, g, b, alpha);
         p.noStroke();
-        p.textFont('Jost');
-        p.textSize(9);
-        p.textStyle(p.NORMAL);
-        p.textAlign(p.CENTER, p.BOTTOM);
-        p.text(keyLetter.toUpperCase(), this.x, this.y - this.radius - 5);
+        const dotD = this.expanded ? 9 : 6;
+        p.circle(this.x, this.y - this.radius - 10, dotD);
+        p.pop();
       }
 
       hitTest(px, py) {
@@ -900,22 +916,19 @@
           p.text("GENERATING", g.x, g.y + g.radius + 6);
         });
 
-        // Labels + key labels
+        // Labels + color dots
         const sorted = orderedBubbles();
-        state.bubbles.forEach(bubble => {
-          if (bubble.expanded) {
-            bubble.drawLabel(p);
-          } else {
-            bubble.drawTimestamp(p);
-          }
-        });
-
-        // Key labels — drawn above each bubble
         sorted.forEach((bubble, globalIndex) => {
           const page = Math.floor(globalIndex / KEYS_PER_PAGE);
           const keyIndex = globalIndex % KEYS_PER_PAGE;
+          const color = KEY_COLORS[keyIndex];
           const isCurrentPage = page === currentPage;
-          bubble.drawKeyLabel(p, KEY_ORDER[keyIndex], isCurrentPage);
+          if (bubble.expanded) {
+            bubble.drawLabel(p);
+          } else {
+            bubble.drawTimestamp(p, color, isCurrentPage);
+          }
+          bubble.drawKeyDot(p, color, isCurrentPage);
         });
 
         // Empty state

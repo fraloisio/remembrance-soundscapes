@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Key Color Map — Hope &amp; Despair</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Jost:wght@200;400;900&display=swap" rel="stylesheet">
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #080b07;
+      font-family: 'Jost', sans-serif;
+      color: #e8d7be;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    h1 {
+      font-size: 0.68rem;
+      font-weight: 900;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      margin: 0 0 0.4rem;
+      opacity: 0.9;
+    }
+    .subtitle {
+      font-size: 0.48rem;
+      font-weight: 200;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      opacity: 0.35;
+      margin-bottom: 3rem;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.7rem 3.5rem;
+    }
+    .entry {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .key-label {
+      font-size: 1.1rem;
+      font-weight: 900;
+      letter-spacing: 0.12em;
+      width: 1.2em;
+      opacity: 0.9;
+    }
+    .color-name {
+      font-size: 0.5rem;
+      font-weight: 200;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      opacity: 0.45;
+    }
+    footer {
+      margin-top: 3.5rem;
+      font-size: 0.42rem;
+      font-weight: 200;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      opacity: 0.2;
+    }
+  </style>
+</head>
+<body>
+  <h1>Key Color Map</h1>
+  <p class="subtitle">Hope &amp; Despair — Keyboard Demo</p>
+  <div class="grid" id="map"></div>
+  <footer>Colors repeat per page — W2, W3 etc. use the same scheme</footer>
+
+  <script>
+    const KEY_ORDER = ['w','a','s','d','f','g','z','x','c','v','b','n'];
+    const KEY_COLORS = [
+      [220,  88,  76],  // W  — dusty red
+      [230, 152,  50],  // A  — amber
+      [185, 210,  65],  // S  — lime
+      [ 85, 185,  98],  // D  — leaf green
+      [ 50, 188, 186],  // F  — teal
+      [ 78, 128, 210],  // G  — cornflower blue
+      [150,  80, 210],  // Z  — violet
+      [215,  78, 162],  // X  — rose
+      [235, 122,  65],  // C  — burnt orange
+      [ 82, 198, 162],  // V  — seafoam
+      [198, 182,  55],  // B  — gold
+      [162, 108, 215],  // N  — lavender
+    ];
+    const COLOR_NAMES = [
+      'Dusty Red', 'Amber', 'Lime', 'Leaf Green',
+      'Teal', 'Cornflower Blue', 'Violet', 'Rose',
+      'Burnt Orange', 'Seafoam', 'Gold', 'Lavender'
+    ];
+
+    const grid = document.getElementById('map');
+    KEY_ORDER.forEach((key, i) => {
+      const [r, g, b] = KEY_COLORS[i];
+      const entry = document.createElement('div');
+      entry.className = 'entry';
+      entry.innerHTML = `
+        <div class="dot" style="background:rgb(${r},${g},${b})"></div>
+        <span class="key-label">${key.toUpperCase()}</span>
+        <span class="color-name">${COLOR_NAMES[i]}</span>
+      `;
+      grid.appendChild(entry);
+    });
+  </script>
+</body>
+</html>
