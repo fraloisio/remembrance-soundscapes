@@ -1,0 +1,9 @@
+ID: 5
+TITLE: Ghosts of War, Whispers of Fear
+TIMESTAMP (UTC): 20260324-181926
+
+ANALYSIS:
+A handwritten Danish note on lined paper is juxtaposed with two faded black-and-white portraits of young men, their faces etched with weariness. Above them, abstract black and textured gray shapes float against a grainy, aged background, suggesting fragmented memories or emotional weight. The note speaks of fear, loss, and a life spent in war.
+
+LONG PROMPT:
+Design a somber, textured audiocape with layered whispers of wind and distant, muffled footsteps, punctuated by the faint rustle of paper and the hollow echo of a single heartbeat, all drifting through a spatially dim, emotionally heavy environment.
