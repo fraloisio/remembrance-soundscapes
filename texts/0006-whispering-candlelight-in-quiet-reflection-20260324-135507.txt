@@ -1,0 +1,9 @@
+ID: 6
+TITLE: Whispering Candlelight in Quiet Reflection
+TIMESTAMP (UTC): 20260324-135507
+
+ANALYSIS:
+A black-and-white photo shows a person in a plaid shirt hunched over, seemingly in contemplation or writing. A small, hand-drawn candle sticker is placed nearby. Overlaid text in Danish reads “Hvorfor lige mig!” and “Lyset for enden af vejen,” suggesting themes of personal questioning and guiding light. The composition feels like a collage, with textured paper and torn edges.
+
+LONG PROMPT:
+Design an ambient soundscape with a soft, flickering candle flame as the central motif — a low hum of introspective thought, textured with distant paper crinkle and the gentle rustle of aged parchment, fading into quiet breath and distant footsteps on gravel, as if walking toward a metaphorical horizon.
