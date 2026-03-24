@@ -81,10 +81,10 @@
     // ==============================
     const CONFIG = {
       USE_LOCAL: false,
-      CSV_URL: "https://raw.githubusercontent.com/fraloisio/sonic-runs-assets/refs/heads/main/records.csv",
+      CSV_URL: "https://fraloisio.github.io/sonic-runs-assets/records.csv",
       LOCAL_CSV: "./records.csv",
       REFRESH_INTERVAL_MS: 8_000,
-      PENDING_URL: "https://raw.githubusercontent.com/fraloisio/sonic-runs-assets/refs/heads/main/pending.json",
+      PENDING_URL: "https://fraloisio.github.io/sonic-runs-assets/pending.json",
       PENDING_MAX_AGE_MS: 600_000,
       BASE_RADIUS_MIN: 12,
       BASE_RADIUS_MAX: 42,
@@ -554,7 +554,7 @@
       async fetchRecords() {
         try {
           const csvUrl = CONFIG.USE_LOCAL ? CONFIG.LOCAL_CSV : `${CONFIG.CSV_URL}?t=${Date.now()}`;
-          const response = await fetch(csvUrl);
+          const response = await fetch(csvUrl, { cache: 'no-store' });
           if (!response.ok) throw new Error(`HTTP ${response.status}`);
           const text = await response.text();
           const rows = CSVParser.parse(text);
@@ -624,7 +624,7 @@
 
       async fetchPending() {
         try {
-          const resp = await fetch(`${CONFIG.PENDING_URL}?t=${Date.now()}`);
+          const resp = await fetch(`${CONFIG.PENDING_URL}?t=${Date.now()}`, { cache: 'no-store' });
           if (!resp.ok) { this.syncGhosts(0); return; }
           const entries = await resp.json();
           const now = Date.now();
