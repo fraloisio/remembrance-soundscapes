@@ -124,19 +124,11 @@
     <div id="page-indicator"></div>
     <div class="key-row">
       <div class="key-dot" id="key-w"></div>
-      <div class="key-dot" id="key-a"></div>
       <div class="key-dot" id="key-s"></div>
-      <div class="key-dot" id="key-d"></div>
       <div class="key-dot" id="key-f"></div>
-      <div class="key-dot" id="key-g"></div>
-    </div>
-    <div class="key-row">
       <div class="key-dot" id="key-z"></div>
-      <div class="key-dot" id="key-x"></div>
       <div class="key-dot" id="key-c"></div>
-      <div class="key-dot" id="key-v"></div>
       <div class="key-dot" id="key-b"></div>
-      <div class="key-dot" id="key-n"></div>
     </div>
     <div id="space-hint"></div>
   </div>
@@ -176,24 +168,17 @@
     // ==============================
     // KEYBOARD STATE
     // ==============================
-    const KEY_ORDER = ['w','a','s','d','f','g','z','x','c','v','b','n'];
-    const KEYS_PER_PAGE = 12;
+    const KEY_ORDER = ['w','s','f','z','c','b'];
+    const KEYS_PER_PAGE = 6;
 
-    // 12 unique colors — one per key slot, consistent across pages
-    // Full color wheel spread (~30° apart) for maximum perceptual contrast
+    // 6 unique colors — one per key slot, consistent across pages
     const KEY_COLORS = [
       [225,  55,  55],  // W  — red
-      [230, 125,  35],  // A  — orange
       [210, 195,  30],  // S  — yellow
-      [130, 210,  40],  // D  — chartreuse
       [ 40, 185,  70],  // F  — green
-      [ 30, 190, 170],  // G  — teal
       [ 35, 160, 220],  // Z  — sky blue
-      [ 55,  85, 210],  // X  — royal blue
       [130,  50, 205],  // C  — purple
-      [210,  50, 180],  // V  — magenta
       [220,  55, 105],  // B  — crimson
-      [190, 150,  35],  // N  — gold
     ];
     let currentPage = 0;
 
