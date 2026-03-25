@@ -187,7 +187,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (FAKE_MODE) return runFakeMode(file);
 
     try {
-      const HF_SPACE = "Hope-and-Despair/remembrance-soundscapes";
+      const HF_SPACE = "fraloisio/remembrance-soundscapes";
       const client = await Client.connect(HF_SPACE);
       const job = client.submit("/pipeline_from_image", [file]);
 
