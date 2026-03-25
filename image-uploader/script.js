@@ -202,7 +202,13 @@ document.addEventListener("DOMContentLoaded", () => {
           const mins = Math.floor(elapsed / 60);
           const secs = elapsed % 60;
           const elapsedStr = mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
-          loadingText.innerHTML = `Listening to your image.<br>Translating memory into sound.<br><span style="opacity:0.5">${elapsedStr}</span>`;
+          // Update elapsed span if phase text is showing, else full line
+          const span = document.getElementById("elapsed-span");
+          if (span) {
+            span.textContent = elapsedStr;
+          } else {
+            loadingText.innerHTML = `Listening to your image.<br>Translating memory into sound.<br><span style="opacity:0.5">${elapsedStr}</span>`;
+          }
         }, 1000);
       }
 
@@ -230,6 +236,11 @@ document.addEventListener("DOMContentLoaded", () => {
             queueStatus.textContent = "";
             if (!processingStart) startElapsedTimer();
             progressBar.classList.add("active");
+            // Show phase description from gr.Progress if available
+            const phase = s.progress_data?.[0]?.desc;
+            if (phase) {
+              loadingText.innerHTML = `${phase}<br><span style="opacity:0.5" id="elapsed-span"></span>`;
+            }
           }
         } else if (msg.type === "data") {
           [audioRes, metaRes] = msg.data;
