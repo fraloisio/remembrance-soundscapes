@@ -2,842 +2,248 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>What Does a Memorial Visit Sound Like?</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hope & Despair — Project Hub</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Jost:wght@200;400;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Jost:wght@200;400;700;900&display=swap" rel="stylesheet">
   <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
     html, body {
-      margin: 0;
-      padding: 0;
-      background: #080b07;
-      font-family: 'Jost', sans-serif;
-      overflow: hidden;
-    }
-    #p5-container {
-      position: fixed;
-      inset: 0;
-    }
-    /* Subtle grain overlay via SVG turbulence — no JS cost */
-    #memories-count {
-      position: fixed;
-      bottom: 1.3rem;
-      right: 1.6rem;
-      font-family: 'Jost', sans-serif;
-      font-size: 0.58rem;
-      font-weight: 200;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
+      background: #0d0f0c;
       color: #e8d7be;
-      pointer-events: none;
-    }
-    #site-credit {
-      position: fixed;
-      bottom: 1.3rem;
-      left: 1.6rem;
       font-family: 'Jost', sans-serif;
-      color: #e8d7be;
-      pointer-events: none;
-      line-height: 1.7;
-    }
-    #site-credit .brand {
-      display: block;
-      font-size: 0.68rem;
-      font-weight: 900;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-    }
-    #site-credit .tagline {
-      display: block;
-      font-size: 0.52rem;
       font-weight: 200;
-      letter-spacing: 0.13em;
-      text-transform: uppercase;
+      min-height: 100vh;
     }
 
-    #p5-container::after {
-      content: '';
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      opacity: 0.092;
-      background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='250' height='250'><filter id='g'><feTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='250' height='250' filter='url(%23g)'/></svg>");
+    /* ── layout ── */
+    .page {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 4rem 2rem 6rem;
+    }
+
+    /* ── header ── */
+    .site-title {
+      font-size: 0.6rem;
+      font-weight: 900;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: #5a5e4a;
+      margin-bottom: 0.5rem;
+    }
+    h1 {
+      font-size: 2.2rem;
+      font-weight: 900;
+      letter-spacing: -0.01em;
+      line-height: 1.15;
+      color: #e8d7be;
+      margin-bottom: 0.6rem;
+    }
+    .subtitle {
+      font-size: 0.78rem;
+      font-weight: 200;
+      letter-spacing: 0.06em;
+      color: #7a7e6a;
+      line-height: 1.7;
+      max-width: 500px;
+      margin-bottom: 3.5rem;
+    }
+
+    /* ── section ── */
+    .section-label {
+      font-size: 0.55rem;
+      font-weight: 700;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: #3a3e30;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid #1e211c;
+    }
+
+    .section + .section { margin-top: 2.5rem; }
+
+    /* ── cards ── */
+    .card-grid {
+      display: grid;
+      gap: 0.5rem;
+    }
+
+    .card {
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+      padding: 1rem 1.1rem;
+      border: 1px solid #1e211c;
+      border-radius: 4px;
+      text-decoration: none;
+      color: inherit;
+      transition: background 0.12s, border-color 0.12s;
+    }
+    .card:hover {
+      background: #131613;
+      border-color: #2e3228;
+    }
+
+    .card-icon {
+      font-size: 1.1rem;
+      flex-shrink: 0;
+      width: 28px;
+      text-align: center;
+      opacity: 0.7;
+    }
+
+    .card-body { flex: 1; }
+
+    .card-name {
+      font-size: 0.82rem;
+      font-weight: 400;
+      letter-spacing: 0.04em;
+      color: #d8c8aa;
+      margin-bottom: 0.18rem;
+    }
+
+    .card-desc {
+      font-size: 0.62rem;
+      font-weight: 200;
+      letter-spacing: 0.06em;
+      color: #5a5e4a;
+      line-height: 1.5;
+    }
+
+    .card-arrow {
+      font-size: 0.65rem;
+      color: #3a3e30;
+      flex-shrink: 0;
+    }
+    .card:hover .card-arrow { color: #6a6e5a; }
+
+    /* ── tag badges ── */
+    .tag {
+      display: inline-block;
+      font-size: 0.5rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      padding: 0.15rem 0.45rem;
+      border-radius: 2px;
+      margin-left: 0.5rem;
+      vertical-align: middle;
+      position: relative;
+      top: -1px;
+    }
+    .tag-live    { background: #1e3a22; color: #5db87a; }
+    .tag-archive { background: #2a2a1a; color: #8a8a5a; }
+    .tag-admin   { background: #2a1e1e; color: #a06060; }
+
+    /* ── footer ── */
+    footer {
+      margin-top: 4rem;
+      font-size: 0.58rem;
+      letter-spacing: 0.1em;
+      color: #2e3228;
+      text-align: center;
     }
   </style>
 </head>
 <body>
-  <div id="p5-container"></div>
-  <div id="site-credit">
-    <span class="brand">Hope &amp; Despair</span>
-    <span class="tagline">What does a memorial visit sound like?</span>
+  <div class="page">
+
+    <p class="site-title">Hope &amp; Despair</p>
+    <h1>Project Hub</h1>
+    <p class="subtitle">An image-to-sound installation. Upload an image, receive a 30-second soundscape. Navigate between visualizations, interactive sessions, and archives below.</p>
+
+    <!-- Live -->
+    <div class="section">
+      <p class="section-label">Live — Session 2</p>
+      <div class="card-grid">
+
+        <a class="card" href="soundscapes.html">
+          <span class="card-icon">◉</span>
+          <div class="card-body">
+            <div class="card-name">Soundscapes <span class="tag tag-live">Live</span></div>
+            <div class="card-desc">Floating bubble visualization — each bubble is a generated soundscape from the current session.</div>
+          </div>
+          <span class="card-arrow">→</span>
+        </a>
+
+        <a class="card" href="soundscapes-with-buttons.html">
+          <span class="card-icon">⌨</span>
+          <div class="card-body">
+            <div class="card-name">Soundscapes with Buttons <span class="tag tag-live">Live</span></div>
+            <div class="card-desc">Keyboard-driven interface — hold W S F Z C B to expand and hear individual soundscapes.</div>
+          </div>
+          <span class="card-arrow">→</span>
+        </a>
+
+      </div>
+    </div>
+
+    <!-- Archive 1 -->
+    <div class="section">
+      <p class="section-label">Archive — Session 1</p>
+      <div class="card-grid">
+
+        <a class="card" href="archive-1.html">
+          <span class="card-icon">◉</span>
+          <div class="card-body">
+            <div class="card-name">Soundscapes <span class="tag tag-archive">Archive 1</span></div>
+            <div class="card-desc">Frozen bubble visualization of all soundscapes generated in Session 1.</div>
+          </div>
+          <span class="card-arrow">→</span>
+        </a>
+
+        <a class="card" href="soundscapes-with-buttons-archive-1.html">
+          <span class="card-icon">⌨</span>
+          <div class="card-body">
+            <div class="card-name">Soundscapes with Buttons <span class="tag tag-archive">Archive 1</span></div>
+            <div class="card-desc">Keyboard interface for Session 1 — frozen dataset, same controls.</div>
+          </div>
+          <span class="card-arrow">→</span>
+        </a>
+
+      </div>
+    </div>
+
+    <!-- Tools -->
+    <div class="section">
+      <p class="section-label">Tools</p>
+      <div class="card-grid">
+
+        <a class="card" href="admin.html">
+          <span class="card-icon">⚙</span>
+          <div class="card-body">
+            <div class="card-name">Admin <span class="tag tag-admin">Private</span></div>
+            <div class="card-desc">Browse all records with image previews. Delete entries via the GitHub API — requires a personal access token.</div>
+          </div>
+          <span class="card-arrow">→</span>
+        </a>
+
+        <a class="card" href="uploaded-images.html">
+          <span class="card-icon">🖼</span>
+          <div class="card-body">
+            <div class="card-name">Uploaded Images</div>
+            <div class="card-desc">Gallery of all source images uploaded to the pipeline.</div>
+          </div>
+          <span class="card-arrow">→</span>
+        </a>
+
+        <a class="card" href="key-color-map.html">
+          <span class="card-icon">◑</span>
+          <div class="card-body">
+            <div class="card-name">Key Color Map</div>
+            <div class="card-desc">Reference showing which color is assigned to each key (W S F Z C B).</div>
+          </div>
+          <span class="card-arrow">→</span>
+        </a>
+
+      </div>
+    </div>
+
+    <footer>fraloisio.github.io/sonic-runs-assets</footer>
+
   </div>
-  <div id="memories-count"></div>
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.3/p5.min.js"></script>
-
-  <script>
-    // ==============================
-    // CONFIG
-    // ==============================
-    const CONFIG = {
-      USE_LOCAL: false,
-      CSV_URL: "https://fraloisio.github.io/sonic-runs-assets/records.csv",
-      LOCAL_CSV: "./records.csv",
-      REFRESH_INTERVAL_MS: 4_000,
-      PENDING_URL: "https://fraloisio.github.io/sonic-runs-assets/pending.json",
-      PENDING_MAX_AGE_MS: 600_000,
-      BASE_RADIUS_MIN: 12,
-      BASE_RADIUS_MAX: 42,
-      EXPANDED_RADIUS: 220,
-      FADE_DURATION_MS: 800,
-      LERP_SPEED: 0.075,
-      DRIFT_SPEED: { min: 0.07, max: 0.2},
-      IMG_DRAW_SIZE: 450,
-      // Spotlight (bubble illuminates the dark background)
-      SPOTLIGHT_RADIUS_MULT: 6.5,
-      SPOTLIGHT_ALPHA: 1,
-      // Breathing
-      BREATH_SPEED: { min: 0.009, max: 0.014 },
-      BREATH_AMT:   { min: 2,   max: 4.0   },
-      // Palette
-      BG:       [0,  0,   0],   // total black
-      OLIVE:    [45, 59,  42],  // revealed by spotlight
-      CREAM:    [232, 215, 190],
-    };
-
-    const lerp = (a, b, t) => a + (b - a) * t;
-    const randomRange = (min, max) => min + Math.random() * (max - min);
-
-    // ==============================
-    // STATE
-    // ==============================
-    const state = {
-      bubbles: [],
-      bubblesById: {},
-      ghostBubbles: [],
-      p5Instance: null,
-      drag: { target: null, offsetX: 0, offsetY: 0, moved: false, startX: 0, startY: 0 }
-    };
-
-    // ==============================
-    // AUDIO MANAGER
-    // ==============================
-    class AudioManager {
-      constructor(url) {
-        this.audio = new Audio(url);
-        this.audio.loop = true;
-        this.audio.volume = 0;
-        this.fadeInterval = null;
-      }
-
-      fade(targetVolume, duration, onComplete) {
-        if (this.fadeInterval) clearInterval(this.fadeInterval);
-        const startVolume = this.audio.volume;
-        const startTime = performance.now();
-        this.fadeInterval = setInterval(() => {
-          const progress = Math.min(1, (performance.now() - startTime) / duration);
-          this.audio.volume = lerp(startVolume, targetVolume, progress);
-          if (progress >= 1) {
-            clearInterval(this.fadeInterval);
-            this.fadeInterval = null;
-            if (onComplete) onComplete();
-          }
-        }, 40);
-      }
-
-      fadeIn(duration = CONFIG.FADE_DURATION_MS) {
-        this.audio.play().catch(err => console.warn("Audio play error:", err));
-        this.fade(1, duration);
-      }
-
-      fadeOut(duration = CONFIG.FADE_DURATION_MS) {
-        this.fade(0, duration, () => this.audio.pause());
-      }
-
-      cleanup() {
-        if (this.fadeInterval) clearInterval(this.fadeInterval);
-        this.audio.pause();
-      }
-    }
-
-    // ==============================
-    // IMAGE COLOR SAMPLER
-    // ==============================
-    const ImageColorSampler = {
-      async sampleColors(url) {
-        return new Promise((resolve) => {
-          const img = new Image();
-          img.crossOrigin = "anonymous";
-          img.onload = () => {
-            try { resolve(this.extractColors(img)); }
-            catch (e) { resolve(this.getDefaultColors()); }
-          };
-          img.onerror = () => resolve(this.getDefaultColors());
-          img.src = url;
-        });
-      },
-
-      extractColors(img) {
-        const canvas = document.createElement("canvas");
-        const ctx = canvas.getContext("2d");
-        const size = 16;
-        canvas.width = size; canvas.height = size;
-        ctx.drawImage(img, 0, 0, size, size);
-        const data = ctx.getImageData(0, 0, size, size).data;
-        let r = 0, g = 0, b = 0, count = 0;
-        let maxBrightness = -1, brightest = [...CONFIG.CREAM];
-        for (let i = 0; i < data.length; i += 4) {
-          r += data[i]; g += data[i+1]; b += data[i+2]; count++;
-          const brightness = data[i] + data[i+1] + data[i+2];
-          if (brightness > maxBrightness) {
-            maxBrightness = brightness;
-            brightest = [data[i], data[i+1], data[i+2]];
-          }
-        }
-        const avg = [r/count, g/count, b/count];
-        const baseColor = avg.map(c => Math.min(255, Math.floor(c * 0.7 + 50)));
-        const glowColor = brightest.map(c => Math.min(255, Math.floor(c * 1.2)));
-        return { baseColor, glowColor };
-      },
-
-      getDefaultColors() {
-        return { baseColor: [...CONFIG.CREAM], glowColor: [...CONFIG.CREAM] };
-      }
-    };
-
-    // ==============================
-    // BUBBLE CLASS
-    // ==============================
-    class Bubble {
-      constructor(record) {
-        this.id = record.id;
-        this.title = record.title || "";
-        this.timestamp = record.timestamp || "";
-        this.description = record.description || "";
-        this.imageUrl = record.imageUrl;
-        this.audioUrl = record.audioUrl;
-
-        this.image = null;
-        this.audioManager = this.audioUrl ? new AudioManager(this.audioUrl) : null;
-
-        this.baseColor = [...CONFIG.CREAM];
-        this.glowColor = [...CONFIG.CREAM];
-
-        this.initializePosition();
-        this.initializeSize();
-
-        this.expanded = false;
-        this.imageAlpha = 0;
-
-        if (this.imageUrl) this.loadImageAndColors(this.imageUrl);
-      }
-
-      initializePosition() {
-        this.x = randomRange(120, window.innerWidth - 120);
-        this.y = randomRange(120, window.innerHeight - 120);
-        // Perlin noise offsets — stagger so bubbles don't move in sync
-        this.noiseOffsetX = Math.random() * 1000;
-        this.noiseOffsetY = Math.random() * 1000 + 500;
-        this.noiseTime = Math.random() * 100;
-        this.speed = randomRange(CONFIG.DRIFT_SPEED.min, CONFIG.DRIFT_SPEED.max);
-        // Impulse velocity (decays after drag release)
-        this.vx = 0;
-        this.vy = 0;
-      }
-
-      initializeSize() {
-        this.baseRadius = randomRange(CONFIG.BASE_RADIUS_MIN, CONFIG.BASE_RADIUS_MAX);
-        this.radius = this.baseRadius;
-        this.targetRadius = this.baseRadius;
-        // Each bubble breathes at its own pace and amplitude
-        this.breathPhase = Math.random() * Math.PI * 2;
-        this.breathSpeed = randomRange(CONFIG.BREATH_SPEED.min, CONFIG.BREATH_SPEED.max);
-        this.breathAmt   = randomRange(CONFIG.BREATH_AMT.min,   CONFIG.BREATH_AMT.max);
-        // Unique noise offset for organic clip shape — fixed per bubble
-        this.shapeOffset = Math.random() * 500;
-      }
-
-      async loadImageAndColors(url) {
-        const colors = await ImageColorSampler.sampleColors(url);
-        this.baseColor = colors.baseColor;
-        this.glowColor = colors.glowColor;
-        if (state.p5Instance) {
-          state.p5Instance.loadImage(
-            url,
-            img => { this.image = img; },
-            err => console.warn("Could not load bubble image:", err)
-          );
-        }
-      }
-
-      setExpanded(expanded) {
-        this.expanded = expanded;
-        if (expanded) {
-          this.bringToFront();
-          this.audioManager?.fadeIn();
-        } else {
-          this.audioManager?.fadeOut();
-        }
-      }
-
-      bringToFront() {
-        const idx = state.bubbles.indexOf(this);
-        if (idx >= 0) { state.bubbles.splice(idx, 1); state.bubbles.push(this); }
-      }
-
-      update() {
-        this.updatePosition();
-        this.updateAppearance();
-      }
-
-      updatePosition() {
-        if (this.expanded) return;
-
-        const p = state.p5Instance;
-        this.noiseTime += 0.007;
-
-        // Two independent noise fields for x and y — bubbles roam freely across the full canvas
-        const nx = (p.noise(this.noiseOffsetX + this.noiseTime) - 0.5) * 2;
-        const ny = (p.noise(this.noiseOffsetY + this.noiseTime * 0.79) - 0.5) * 2;
-        this.x += nx * this.speed + this.vx;
-        this.y += ny * this.speed + this.vy;
-
-        // Decay impulse velocity
-        this.vx *= 0.93;
-        this.vy *= 0.93;
-
-        // Hard boundary bounce — ensures bubbles reach the edges
-        const margin = this.radius + 20;
-        const { innerWidth: w, innerHeight: h } = window;
-        if (this.x < margin)     { this.x = margin;     this.vx = Math.abs(this.vx) + 0.3; }
-        if (this.x > w - margin) { this.x = w - margin; this.vx = -(Math.abs(this.vx) + 0.3); }
-        if (this.y < margin)     { this.y = margin;     this.vy = Math.abs(this.vy) + 0.3; }
-        if (this.y > h - margin) { this.y = h - margin; this.vy = -(Math.abs(this.vy) + 0.3); }
-      }
-
-      updateAppearance() {
-        if (!this.expanded) {
-          this.breathPhase += this.breathSpeed;
-          this.targetRadius = this.baseRadius + Math.sin(this.breathPhase) * this.breathAmt;
-        } else {
-          this.targetRadius = CONFIG.EXPANDED_RADIUS;
-        }
-        this.radius = lerp(this.radius, this.targetRadius, CONFIG.LERP_SPEED);
-        if (Math.abs(this.radius - this.targetRadius) < 0.3) this.radius = this.targetRadius;
-        this.imageAlpha = lerp(this.imageAlpha, this.expanded ? 255 : 0, CONFIG.LERP_SPEED);
-      }
-
-      draw(p) {
-        this.drawGlow(p);
-        this.drawCircle(p);
-        if (this.expanded) this.drawLabel(p);
-      }
-
-      drawSpotlight(p) {
-        p.push();
-        p.translate(this.x, this.y);
-
-        const ctx = p.drawingContext;
-        const prevComposite = ctx.globalCompositeOperation;
-        // Additive blend: overlapping halos accumulate light
-        ctx.globalCompositeOperation = 'lighter';
-
-        const pulse = 1 + Math.sin(this.breathPhase) * 0.05;
-        const spotR = this.radius * CONFIG.SPOTLIGHT_RADIUS_MULT * pulse;
-        const [or, og, ob] = CONFIG.OLIVE;
-
-        // Scale intensity with bubble size — small bubbles glow faintly, expanded = full
-        const sizeRatio = Math.pow(this.radius / CONFIG.EXPANDED_RADIUS, 0.7);
-        // Boost glow when there are few bubbles so the canvas doesn't look too dark
-        const totalBubbles = Math.max(1, state.bubbles.length + state.ghostBubbles.length);
-        const scarcityBoost = Math.min(4.0, Math.pow(15 / totalBubbles, 0.6));
-        const alpha = CONFIG.SPOTLIGHT_ALPHA * sizeRatio * (this.expanded ? 1.15 : 1.0) * scarcityBoost;
-
-        const grad = ctx.createRadialGradient(0, 0, this.radius * 0.1, 0, 0, spotR);
-        grad.addColorStop(0,    `rgba(${or},${og},${ob},${alpha})`);
-        grad.addColorStop(0.3,  `rgba(${or},${og},${ob},${alpha * 0.65})`);
-        grad.addColorStop(0.65, `rgba(${or},${og},${ob},${alpha * 0.28})`);
-        grad.addColorStop(1,    `rgba(${or},${og},${ob},0)`);
-
-        ctx.fillStyle = grad;
-        ctx.beginPath();
-        ctx.arc(0, 0, spotR, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.globalCompositeOperation = prevComposite;
-        p.pop();
-      }
-
-      buildOrganicPath(ctx, p, r) {
-        const steps = 64;
-        ctx.beginPath();
-        for (let i = 0; i <= steps; i++) {
-          const angle = (i / steps) * Math.PI * 2;
-          // Sample noise in a circle so the shape is closed and consistent
-          const n = p.noise(
-            Math.cos(angle) * 0.9 + this.shapeOffset,
-            Math.sin(angle) * 0.9 + this.shapeOffset + 200
-          );
-          const distortion = (n - 0.5) * r * 0.22;
-          const rad = r + distortion;
-          const px = Math.cos(angle) * rad;
-          const py = Math.sin(angle) * rad;
-          if (i === 0) ctx.moveTo(px, py);
-          else ctx.lineTo(px, py);
-        }
-        ctx.closePath();
-      }
-
-      drawCircle(p) {
-        p.push();
-        p.translate(this.x, this.y);
-
-        const ctx = p.drawingContext;
-        ctx.save();
-        this.buildOrganicPath(ctx, p, this.radius);
-        ctx.clip();
-
-        if (this.image) {
-          const iw = this.image.width;
-          const ih = this.image.height;
-          const target = CONFIG.IMG_DRAW_SIZE * 1.1;
-          const scale = Math.max(target / iw, target / ih);
-          const w = iw * scale, h = ih * scale;
-          p.image(this.image, -w / 2, -h / 2, w, h);
-        } else {
-          const [r, g, b] = this.baseColor;
-          p.fill(r, g, b, 200);
-          p.noStroke();
-          p.circle(0, 0, this.radius * 2);
-        }
-
-        ctx.restore();
-
-        // Organic rim — trace the same wobbly path
-        p.noFill();
-        const [cr, cg, cb] = CONFIG.CREAM;
-        p.stroke(cr, cg, cb, this.expanded ? 50 : 22);
-        p.strokeWeight(1);
-        p.beginShape();
-        const steps = 64;
-        for (let i = 0; i <= steps; i++) {
-          const angle = (i / steps) * Math.PI * 2;
-          const n = p.noise(
-            Math.cos(angle) * 0.9 + this.shapeOffset,
-            Math.sin(angle) * 0.9 + this.shapeOffset + 200
-          );
-          const distortion = (n - 0.5) * this.radius * 0.22;
-          const rad = this.radius + distortion;
-          p.curveVertex(Math.cos(angle) * rad, Math.sin(angle) * rad);
-        }
-        p.endShape(p.CLOSE);
-
-        p.pop();
-      }
-
-      drawLabel(p) {
-        p.blendMode(p.BLEND);
-        const [cr, cg, cb] = CONFIG.CREAM;
-        p.fill(cr, cg, cb, 160);
-        p.noStroke();
-        p.textFont('Jost');
-        p.textSize(10);
-        p.textStyle(p.NORMAL);
-        p.textAlign(p.CENTER, p.TOP);
-        p.text(this.title.toUpperCase(), this.x, this.y + this.radius + 14);
-      }
-
-      drawTimestamp(p) {
-        if (!this.timestamp) return;
-        p.blendMode(p.BLEND);
-        const [cr, cg, cb] = CONFIG.CREAM;
-        p.fill(cr, cg, cb, 178);
-        p.noStroke();
-        p.textFont('Jost');
-        p.textSize(8);
-        p.textStyle(p.NORMAL);
-        p.textAlign(p.CENTER, p.TOP);
-        // Format: "20 Nov 2025 · 22:26"
-        // Format: "20251120-234408" → "20 Nov @ 23:44"
-        const m = this.timestamp.match(/^(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})/);
-        const label = m
-          ? new Date(+m[1], +m[2]-1, +m[3], +m[4], +m[5])
-              .toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }) + '  |  ' +
-            `${m[4]}:${m[5]}`
-          : this.timestamp;
-        p.text(label, this.x, this.y + this.radius + 6);
-      }
-
-      hitTest(px, py) {
-        const dx = px - this.x, dy = py - this.y;
-        const r = this.radius + this.radius * 0.12 + 4;
-        return dx * dx + dy * dy <= r * r;
-      }
-
-      updateData(record) {
-        this.title = record.title || this.title;
-        this.description = record.description || this.description;
-        if (record.imageUrl && record.imageUrl !== this.imageUrl) {
-          this.imageUrl = record.imageUrl;
-          this.loadImageAndColors(record.imageUrl);
-        }
-        if (record.audioUrl && record.audioUrl !== this.audioUrl) {
-          this.audioManager?.cleanup();
-          this.audioUrl = record.audioUrl;
-          this.audioManager = new AudioManager(record.audioUrl);
-        }
-        if (record.textUrl) this.textUrl = record.textUrl;
-      }
-
-      cleanup() { this.audioManager?.cleanup(); }
-    }
-
-    // ==============================
-    // CSV PARSER
-    // ==============================
-    const CSVParser = {
-      parse(text) {
-        const lines = this.splitLines(text);
-        if (lines.length === 0) return [];
-        const headers = this.parseRow(lines[0]).map(h => h.trim().toLowerCase());
-        const rows = [];
-        for (let i = 1; i < lines.length; i++) {
-          if (!lines[i].trim()) continue;
-          const cols = this.parseRow(lines[i]);
-          const row = {};
-          headers.forEach((h, idx) => { row[h] = cols[idx] || ""; });
-          rows.push(row);
-        }
-        return rows;
-      },
-
-      splitLines(text) {
-        const lines = [];
-        let currentLine = "", inQuotes = false;
-        for (let i = 0; i < text.length; i++) {
-          const ch = text[i];
-          if (ch === '"') {
-            currentLine += ch;
-            if (inQuotes && text[i+1] === '"') { currentLine += text[++i]; }
-            else { inQuotes = !inQuotes; }
-          } else if (ch === "\n" && !inQuotes) {
-            lines.push(currentLine.replace(/\r$/, ""));
-            currentLine = "";
-          } else { currentLine += ch; }
-        }
-        if (currentLine.trim()) lines.push(currentLine.replace(/\r$/, ""));
-        return lines;
-      },
-
-      parseRow(line) {
-        const result = [];
-        let current = "", inQuotes = false;
-        for (let i = 0; i < line.length; i++) {
-          const ch = line[i];
-          if (ch === '"') {
-            if (inQuotes && line[i+1] === '"') { current += '"'; i++; }
-            else { inQuotes = !inQuotes; }
-          } else if (ch === ',' && !inQuotes) { result.push(current); current = ""; }
-          else { current += ch; }
-        }
-        result.push(current);
-        return result;
-      }
-    };
-
-    // ==============================
-    // DATA MANAGER
-    // ==============================
-    let lastFetchedRecords = {};
-
-    const DataManager = {
-      async fetchRecords() {
-        try {
-          const csvUrl = CONFIG.USE_LOCAL ? CONFIG.LOCAL_CSV : `${CONFIG.CSV_URL}?t=${Date.now()}`;
-          const response = await fetch(csvUrl, { cache: 'no-store' });
-          if (!response.ok) throw new Error(`HTTP ${response.status}`);
-          const text = await response.text();
-          const rows = CSVParser.parse(text);
-          lastFetchedRecords = this.transformRows(rows);
-          this.syncBubbles(lastFetchedRecords);
-          const n = Object.keys(lastFetchedRecords).length;
-          const el = document.getElementById("memories-count");
-          if (el) el.textContent = `${n} ${n === 1 ? "soundscape" : "soundscapes"}`;
-        } catch (error) {
-          console.error("Error fetching CSV:", error);
-        }
-      },
-
-      transformRows(rows) {
-        const records = {};
-        const localPath = (p, folder) => {
-          if (!p) return "";
-          const parts = p.split("/");
-          const file = parts[parts.length - 1] || "";
-          return folder && file ? `${folder}/${file}` : file;
-        };
-        rows.forEach(row => {
-          const id = row.id?.trim();
-          if (!id || !/^\d+/.test(id)) return;
-          const useLocal = CONFIG.USE_LOCAL;
-          const imageUrl = useLocal
-            ? (localPath(row.image_local, "images") || row.image_url)
-            : (row.image_url?.trim() || localPath(row.image_local, "images"));
-          const audioUrl = useLocal
-            ? (localPath(row.audio_local, "audio") || row.audio_url)
-            : (row.audio_url?.trim() || localPath(row.audio_local, "audio"));
-          const textUrl = useLocal
-            ? (localPath(row.text_local, "texts") || row.text_url)
-            : (row.text_url?.trim() || localPath(row.text_local, "texts"));
-          records[id] = {
-            id,
-            title:     row.title?.trim()     || "",
-            timestamp: row.timestamp?.trim() || "",
-            imageUrl, audioUrl, textUrl,
-            description: [row.analysis, row.long_prompt]
-              .filter(p => p?.trim()).map(p => p.trim()).join("\n\n")
-          };
-        });
-        return records;
-      },
-
-      syncBubbles(records) {
-        state.bubbles = state.bubbles.filter(bubble => {
-          if (!records[bubble.id]) {
-            bubble.cleanup();
-            delete state.bubblesById[bubble.id];
-            return false;
-          }
-          return true;
-        });
-        for (const id in records) {
-          if (state.bubblesById[id]) {
-            state.bubblesById[id].updateData(records[id]);
-          } else {
-            const bubble = new Bubble(records[id]);
-            state.bubbles.push(bubble);
-            state.bubblesById[id] = bubble;
-          }
-        }
-        console.log(`Synced bubbles: ${state.bubbles.length}`);
-      },
-
-      async fetchPending() {
-        try {
-          const resp = await fetch(`${CONFIG.PENDING_URL}?t=${Date.now()}`, { cache: 'no-store' });
-          if (!resp.ok) { this.syncGhosts(0); return; }
-          const entries = await resp.json();
-          const now = Date.now();
-          const active = entries.filter(e => now - new Date(e.started).getTime() < CONFIG.PENDING_MAX_AGE_MS);
-          this.syncGhosts(active.length);
-        } catch {
-          this.syncGhosts(0);
-        }
-      },
-
-      syncGhosts(count) {
-        if (state.ghostBubbles.length === count) return;
-        // Rebuild ghost array with top-of-screen positions
-        state.ghostBubbles = Array.from({ length: count }, (_, i) => {
-          const spread = window.innerWidth / (count + 1);
-          return {
-            x: spread * (i + 1),
-            y: randomRange(55, 100),
-            shapeOffset: Math.random() * 500,
-            breathPhase: Math.random() * Math.PI * 2,
-            breathSpeed: 0.007,
-            breathAmt: 3,
-            baseRadius: 30,
-            radius: 30,
-            blinkPhase: Math.random() * Math.PI * 2
-          };
-        });
-      }
-    };
-
-    // ==============================
-    // INTERACTION HANDLERS
-    // ==============================
-    const InteractionHandler = {
-      onMousePressed(p) {
-        state.drag = { target: null, offsetX: 0, offsetY: 0, moved: false, startX: p.mouseX, startY: p.mouseY };
-        for (let i = state.bubbles.length - 1; i >= 0; i--) {
-          const bubble = state.bubbles[i];
-          if (bubble.hitTest(p.mouseX, p.mouseY)) {
-            state.drag.target = bubble;
-            state.drag.offsetX = p.mouseX - bubble.x;
-            state.drag.offsetY = p.mouseY - bubble.y;
-            break;
-          }
-        }
-      },
-
-      onMouseDragged(p) {
-        if (state.drag.target) {
-          state.drag.moved = true;
-          state.drag.target.x = p.mouseX - state.drag.offsetX;
-          state.drag.target.y = p.mouseY - state.drag.offsetY;
-          state.drag.target.vx = 0;
-          state.drag.target.vy = 0;
-        }
-      },
-
-      onMouseReleased(p) {
-        if (!state.drag.target) return;
-        const dx = p.mouseX - state.drag.startX;
-        const dy = p.mouseY - state.drag.startY;
-        const movedDist = Math.hypot(dx, dy);
-        if (!state.drag.moved || movedDist < 6) {
-          state.drag.target.setExpanded(!state.drag.target.expanded);
-        } else {
-          const angle = Math.random() * Math.PI * 2;
-          const speed = randomRange(0.3, 1.2);
-          state.drag.target.vx = Math.cos(angle) * speed;
-          state.drag.target.vy = Math.sin(angle) * speed;
-        }
-        state.drag = { target: null, offsetX: 0, offsetY: 0, moved: false, startX: 0, startY: 0 };
-      }
-    };
-
-    // ==============================
-    // P5.JS SKETCH
-    // ==============================
-    new p5(p => {
-      let offscreen;
-      let imgVertical;
-
-      p.preload = () => {
-        imgVertical = p.loadImage('assets/vertical_hope_33.png');
-      };
-
-      p.setup = () => {
-        state.p5Instance = p;
-        const canvas = p.createCanvas(window.innerWidth, window.innerHeight);
-        canvas.parent("p5-container");
-        offscreen = p.createGraphics(window.innerWidth, window.innerHeight);
-        p.frameRate(60);
-        p.textFont('Jost');
-        DataManager.fetchRecords();
-        DataManager.fetchPending();
-        setInterval(() => { DataManager.fetchRecords(); DataManager.fetchPending(); }, CONFIG.REFRESH_INTERVAL_MS);
-      };
-
-      p.windowResized = () => {
-        const scaleX = window.innerWidth  / p.width;
-        const scaleY = window.innerHeight / p.height;
-        p.resizeCanvas(window.innerWidth, window.innerHeight);
-        offscreen = p.createGraphics(window.innerWidth, window.innerHeight);
-        state.bubbles.forEach(b => { b.x *= scaleX; b.y *= scaleY; });
-      };
-
-      p.draw = () => {
-        const [r, g, b] = CONFIG.BG;
-
-        // 1. Near-black background
-        p.background(r, g, b);
-
-        // 2. Spotlights — each bubble reveals a pool of olive light beneath it
-        state.bubbles.forEach(bubble => {
-          bubble.update();
-          bubble.drawSpotlight(p);
-        });
-
-        // 3. Ink asset — vertical_hope_33.png, tall on left
-        // RGBA asset with dark ink: tint to cream so it's visible on near-black background
-        if (imgVertical) {
-          const [cr, cg, cb] = CONFIG.CREAM;
-          p.tint(255);
-
-          const vS = (p.height * 1.55) / imgVertical.height;
-          const vW = imgVertical.width * vS;
-          const vH = imgVertical.height * vS;
-          p.image(imgVertical, -vW * 0.12, p.height - vH * 0.95, vW, vH);
-
-          p.noTint();
-        }
-
-        // Ghost spotlights for pending generations
-        state.ghostBubbles.forEach(g => {
-          g.breathPhase += g.breathSpeed;
-          g.blinkPhase  += 0.018;
-          g.radius = g.baseRadius + Math.sin(g.breathPhase) * g.breathAmt;
-
-          const ctx = p.drawingContext;
-          const prev = ctx.globalCompositeOperation;
-          ctx.globalCompositeOperation = 'lighter';
-          const spotR = g.radius * 4;
-          const [or, og, ob] = CONFIG.OLIVE;
-          const a = (0.12 + Math.sin(g.blinkPhase) * 0.06);
-          const grad = ctx.createRadialGradient(g.x, g.y, g.radius * 0.1, g.x, g.y, spotR);
-          grad.addColorStop(0,   `rgba(${or},${og},${ob},${a})`);
-          grad.addColorStop(1,   `rgba(${or},${og},${ob},0)`);
-          ctx.fillStyle = grad;
-          ctx.beginPath(); ctx.arc(g.x, g.y, spotR, 0, Math.PI * 2); ctx.fill();
-          ctx.globalCompositeOperation = prev;
-        });
-
-        // Draw bubble circles with MULTIPLY — white backgrounds disappear into the scene
-        state.bubbles.forEach(bubble => bubble.drawCircle(p));
-
-        // Ghost bubble circles
-        state.ghostBubbles.forEach(g => {
-          p.push();
-          p.translate(g.x, g.y);
-          const ctx = p.drawingContext;
-          ctx.save();
-          const steps = 48;
-          ctx.beginPath();
-          for (let i = 0; i <= steps; i++) {
-            const angle = (i / steps) * Math.PI * 2;
-            const n = p.noise(Math.cos(angle) * 0.9 + g.shapeOffset, Math.sin(angle) * 0.9 + g.shapeOffset + 200);
-            const rad = g.radius + (n - 0.5) * g.radius * 0.22;
-            const px = Math.cos(angle) * rad, py = Math.sin(angle) * rad;
-            if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
-          }
-          ctx.closePath();
-          const alpha = 0.12 + Math.sin(g.blinkPhase) * 0.08;
-          ctx.fillStyle = `rgba(232,215,190,${alpha})`;
-          ctx.fill();
-          ctx.strokeStyle = `rgba(232,215,190,${alpha + 0.08})`;
-          ctx.lineWidth = 1;
-          ctx.stroke();
-          ctx.restore();
-          p.pop();
-
-          // "Generating…" label beneath
-          const [cr, cg, cb] = CONFIG.CREAM;
-          p.fill(cr, cg, cb, Math.floor((0.12 + Math.sin(g.blinkPhase) * 0.08) * 255));
-          p.noStroke();
-          p.textSize(7);
-          p.textStyle(p.NORMAL);
-          p.textAlign(p.CENTER, p.TOP);
-          p.text("GENERATING", g.x, g.y + g.radius + 6);
-        });
-
-        // Labels on top
-        state.bubbles.forEach(bubble => {
-          if (bubble.expanded) bubble.drawLabel(p);
-          else bubble.drawTimestamp(p);
-        });
-
-        // Empty state message
-        if (state.bubbles.length === 0) {
-          const [cr, cg, cb] = CONFIG.CREAM;
-          p.noStroke();
-          p.fill(cr, cg, cb, 80);
-          p.textSize(11);
-          p.textStyle(p.NORMAL);
-          p.textAlign(p.CENTER, p.CENTER);
-          p.textLeading(22);
-          p.text("WAITING FOR THE FIRST VOICE", p.width / 2, p.height / 2);
-          p.textAlign(p.LEFT, p.BASELINE);
-        }
-      };
-
-      p.mousePressed  = () => InteractionHandler.onMousePressed(p);
-      p.mouseDragged  = () => InteractionHandler.onMouseDragged(p);
-      p.mouseReleased = () => InteractionHandler.onMouseReleased(p);
-    });
-  </script>
 </body>
 </html>

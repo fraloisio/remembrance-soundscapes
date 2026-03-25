@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Hope & Despair — Keyboard</title>
+  <title>What Does a Memorial Visit Sound Like?</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Jost:wght@200;400;900&display=swap" rel="stylesheet">
@@ -18,14 +18,7 @@
       position: fixed;
       inset: 0;
     }
-    #p5-container::after {
-      content: '';
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      opacity: 0.092;
-      background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='250' height='250'><filter id='g'><feTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='250' height='250' filter='url(%23g)'/></svg>");
-    }
+    /* Subtle grain overlay via SVG turbulence — no JS cost */
     #memories-count {
       position: fixed;
       bottom: 1.3rem;
@@ -62,76 +55,23 @@
       text-transform: uppercase;
     }
 
-    /* ==============================
-       KEYBOARD LEGEND
-       ============================== */
-    #keyboard-legend {
+    #p5-container::after {
+      content: '';
       position: fixed;
-      bottom: 1.4rem;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.35rem;
+      inset: 0;
       pointer-events: none;
-    }
-    #page-indicator {
-      font-size: 0.44rem;
-      font-weight: 200;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      color: rgba(232, 215, 190, 0.35);
-      min-height: 0.8em;
-    }
-    .key-row {
-      display: flex;
-      gap: 0.38rem;
-    }
-    .key-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      transition: opacity 0.2s, transform 0.15s;
-      opacity: 0.12;
-    }
-    .key-dot.has-bubble {
-      opacity: 0.45;
-    }
-    .key-dot.active {
-      opacity: 1;
-      transform: scale(1.5);
-    }
-    #space-hint {
-      font-size: 0.4rem;
-      font-weight: 200;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: rgba(232, 215, 190, 0.18);
+      opacity: 0.092;
+      background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='250' height='250'><filter id='g'><feTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='250' height='250' filter='url(%23g)'/></svg>");
     }
   </style>
 </head>
 <body>
   <div id="p5-container"></div>
-
   <div id="site-credit">
     <span class="brand">Hope &amp; Despair</span>
     <span class="tagline">What does a memorial visit sound like?</span>
   </div>
   <div id="memories-count"></div>
-
-  <div id="keyboard-legend">
-    <div id="page-indicator"></div>
-    <div class="key-row">
-      <div class="key-dot" id="key-w"></div>
-      <div class="key-dot" id="key-s"></div>
-      <div class="key-dot" id="key-f"></div>
-      <div class="key-dot" id="key-z"></div>
-      <div class="key-dot" id="key-c"></div>
-      <div class="key-dot" id="key-b"></div>
-    </div>
-    <div id="space-hint"></div>
-  </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.3/p5.min.js"></script>
 
@@ -151,94 +91,22 @@
       EXPANDED_RADIUS: 220,
       FADE_DURATION_MS: 800,
       LERP_SPEED: 0.075,
-      DRIFT_SPEED: { min: 0.07, max: 0.2 },
+      DRIFT_SPEED: { min: 0.07, max: 0.2},
       IMG_DRAW_SIZE: 450,
+      // Spotlight (bubble illuminates the dark background)
       SPOTLIGHT_RADIUS_MULT: 6.5,
       SPOTLIGHT_ALPHA: 1,
+      // Breathing
       BREATH_SPEED: { min: 0.009, max: 0.014 },
       BREATH_AMT:   { min: 2,   max: 4.0   },
-      BG:    [0,  0,   0],
-      OLIVE: [45, 59,  42],
-      CREAM: [232, 215, 190],
+      // Palette
+      BG:       [0,  0,   0],   // total black
+      OLIVE:    [45, 59,  42],  // revealed by spotlight
+      CREAM:    [232, 215, 190],
     };
 
     const lerp = (a, b, t) => a + (b - a) * t;
     const randomRange = (min, max) => min + Math.random() * (max - min);
-
-    // ==============================
-    // KEYBOARD STATE
-    // ==============================
-    const KEY_ORDER = ['w','s','f','z','c','b'];
-    const KEYS_PER_PAGE = 6;
-
-    // 6 unique colors — one per key slot, consistent across pages
-    const KEY_COLORS = [
-      [225,  55,  55],  // W  — red
-      [210, 195,  30],  // S  — yellow
-      [ 40, 185,  70],  // F  — green
-      [ 35, 160, 220],  // Z  — sky blue
-      [130,  50, 205],  // C  — purple
-      [220,  55, 105],  // B  — crimson
-    ];
-    let currentPage = 0;
-
-    // Returns bubbles sorted stably by numeric ID — used for key mapping
-    function orderedBubbles() {
-      return [...state.bubbles].sort((a, b) => (parseInt(a.id) || 0) - (parseInt(b.id) || 0));
-    }
-
-    function getBubbleForKey(key) {
-      const keyIndex = KEY_ORDER.indexOf(key.toLowerCase());
-      if (keyIndex === -1) return null;
-      return orderedBubbles()[currentPage * KEYS_PER_PAGE + keyIndex] || null;
-    }
-
-    function getKeyIndexForBubble(bubble) {
-      const sorted = orderedBubbles();
-      const globalIndex = sorted.indexOf(bubble);
-      if (globalIndex === -1) return null;
-      const page = Math.floor(globalIndex / KEYS_PER_PAGE);
-      if (page !== currentPage) return null;
-      return globalIndex % KEYS_PER_PAGE;
-    }
-
-    function updateKeyboardLegend() {
-      const sorted = orderedBubbles();
-      const totalPages = Math.max(1, Math.ceil(sorted.length / KEYS_PER_PAGE));
-
-      // Page indicator
-      const pageEl = document.getElementById('page-indicator');
-      if (totalPages > 1) {
-        const labels = Array.from({ length: totalPages }, (_, i) => `Series ${i + 1}`);
-        pageEl.innerHTML = labels.map((l, i) =>
-          i === currentPage
-            ? `<span style="color:rgba(232,215,190,0.75)">${l}</span>`
-            : l
-        ).join(' &nbsp;·&nbsp; ');
-      } else {
-        pageEl.textContent = '';
-      }
-
-      // Space hint
-      const spaceHint = document.getElementById('space-hint');
-      spaceHint.textContent = totalPages > 1 ? 'SPACE — switch page' : '';
-
-      // Dot states
-      KEY_ORDER.forEach((key, i) => {
-        const el = document.getElementById(`key-${key}`);
-        if (!el) return;
-        const [r, g, b] = KEY_COLORS[i];
-        el.style.backgroundColor = `rgb(${r},${g},${b})`;
-        const bubble = sorted[currentPage * KEYS_PER_PAGE + i];
-        if (!bubble) {
-          el.className = 'key-dot';
-        } else if (bubble.expanded) {
-          el.className = 'key-dot active';
-        } else {
-          el.className = 'key-dot has-bubble';
-        }
-      });
-    }
 
     // ==============================
     // STATE
@@ -261,6 +129,7 @@
         this.audio.volume = 0;
         this.fadeInterval = null;
       }
+
       fade(targetVolume, duration, onComplete) {
         if (this.fadeInterval) clearInterval(this.fadeInterval);
         const startVolume = this.audio.volume;
@@ -275,13 +144,16 @@
           }
         }, 40);
       }
+
       fadeIn(duration = CONFIG.FADE_DURATION_MS) {
         this.audio.play().catch(err => console.warn("Audio play error:", err));
         this.fade(1, duration);
       }
+
       fadeOut(duration = CONFIG.FADE_DURATION_MS) {
         this.fade(0, duration, () => this.audio.pause());
       }
+
       cleanup() {
         if (this.fadeInterval) clearInterval(this.fadeInterval);
         this.audio.pause();
@@ -304,6 +176,7 @@
           img.src = url;
         });
       },
+
       extractColors(img) {
         const canvas = document.createElement("canvas");
         const ctx = canvas.getContext("2d");
@@ -326,6 +199,7 @@
         const glowColor = brightest.map(c => Math.min(255, Math.floor(c * 1.2)));
         return { baseColor, glowColor };
       },
+
       getDefaultColors() {
         return { baseColor: [...CONFIG.CREAM], glowColor: [...CONFIG.CREAM] };
       }
@@ -342,24 +216,31 @@
         this.description = record.description || "";
         this.imageUrl = record.imageUrl;
         this.audioUrl = record.audioUrl;
+
         this.image = null;
         this.audioManager = this.audioUrl ? new AudioManager(this.audioUrl) : null;
+
         this.baseColor = [...CONFIG.CREAM];
         this.glowColor = [...CONFIG.CREAM];
+
         this.initializePosition();
         this.initializeSize();
+
         this.expanded = false;
         this.imageAlpha = 0;
+
         if (this.imageUrl) this.loadImageAndColors(this.imageUrl);
       }
 
       initializePosition() {
         this.x = randomRange(120, window.innerWidth - 120);
         this.y = randomRange(120, window.innerHeight - 120);
+        // Perlin noise offsets — stagger so bubbles don't move in sync
         this.noiseOffsetX = Math.random() * 1000;
         this.noiseOffsetY = Math.random() * 1000 + 500;
         this.noiseTime = Math.random() * 100;
         this.speed = randomRange(CONFIG.DRIFT_SPEED.min, CONFIG.DRIFT_SPEED.max);
+        // Impulse velocity (decays after drag release)
         this.vx = 0;
         this.vy = 0;
       }
@@ -368,9 +249,11 @@
         this.baseRadius = randomRange(CONFIG.BASE_RADIUS_MIN, CONFIG.BASE_RADIUS_MAX);
         this.radius = this.baseRadius;
         this.targetRadius = this.baseRadius;
+        // Each bubble breathes at its own pace and amplitude
         this.breathPhase = Math.random() * Math.PI * 2;
         this.breathSpeed = randomRange(CONFIG.BREATH_SPEED.min, CONFIG.BREATH_SPEED.max);
         this.breathAmt   = randomRange(CONFIG.BREATH_AMT.min,   CONFIG.BREATH_AMT.max);
+        // Unique noise offset for organic clip shape — fixed per bubble
         this.shapeOffset = Math.random() * 500;
       }
 
@@ -395,7 +278,6 @@
         } else {
           this.audioManager?.fadeOut();
         }
-        updateKeyboardLegend();
       }
 
       bringToFront() {
@@ -403,18 +285,28 @@
         if (idx >= 0) { state.bubbles.splice(idx, 1); state.bubbles.push(this); }
       }
 
-      update() { this.updatePosition(); this.updateAppearance(); }
+      update() {
+        this.updatePosition();
+        this.updateAppearance();
+      }
 
       updatePosition() {
         if (this.expanded) return;
+
         const p = state.p5Instance;
         this.noiseTime += 0.007;
+
+        // Two independent noise fields for x and y — bubbles roam freely across the full canvas
         const nx = (p.noise(this.noiseOffsetX + this.noiseTime) - 0.5) * 2;
         const ny = (p.noise(this.noiseOffsetY + this.noiseTime * 0.79) - 0.5) * 2;
         this.x += nx * this.speed + this.vx;
         this.y += ny * this.speed + this.vy;
+
+        // Decay impulse velocity
         this.vx *= 0.93;
         this.vy *= 0.93;
+
+        // Hard boundary bounce — ensures bubbles reach the edges
         const margin = this.radius + 20;
         const { innerWidth: w, innerHeight: h } = window;
         if (this.x < margin)     { this.x = margin;     this.vx = Math.abs(this.vx) + 0.3; }
@@ -435,28 +327,43 @@
         this.imageAlpha = lerp(this.imageAlpha, this.expanded ? 255 : 0, CONFIG.LERP_SPEED);
       }
 
+      draw(p) {
+        this.drawGlow(p);
+        this.drawCircle(p);
+        if (this.expanded) this.drawLabel(p);
+      }
+
       drawSpotlight(p) {
         p.push();
         p.translate(this.x, this.y);
+
         const ctx = p.drawingContext;
         const prevComposite = ctx.globalCompositeOperation;
+        // Additive blend: overlapping halos accumulate light
         ctx.globalCompositeOperation = 'lighter';
+
         const pulse = 1 + Math.sin(this.breathPhase) * 0.05;
         const spotR = this.radius * CONFIG.SPOTLIGHT_RADIUS_MULT * pulse;
         const [or, og, ob] = CONFIG.OLIVE;
+
+        // Scale intensity with bubble size — small bubbles glow faintly, expanded = full
         const sizeRatio = Math.pow(this.radius / CONFIG.EXPANDED_RADIUS, 0.7);
+        // Boost glow when there are few bubbles so the canvas doesn't look too dark
         const totalBubbles = Math.max(1, state.bubbles.length + state.ghostBubbles.length);
         const scarcityBoost = Math.min(4.0, Math.pow(15 / totalBubbles, 0.6));
         const alpha = CONFIG.SPOTLIGHT_ALPHA * sizeRatio * (this.expanded ? 1.15 : 1.0) * scarcityBoost;
+
         const grad = ctx.createRadialGradient(0, 0, this.radius * 0.1, 0, 0, spotR);
         grad.addColorStop(0,    `rgba(${or},${og},${ob},${alpha})`);
         grad.addColorStop(0.3,  `rgba(${or},${og},${ob},${alpha * 0.65})`);
         grad.addColorStop(0.65, `rgba(${or},${og},${ob},${alpha * 0.28})`);
         grad.addColorStop(1,    `rgba(${or},${og},${ob},0)`);
+
         ctx.fillStyle = grad;
         ctx.beginPath();
         ctx.arc(0, 0, spotR, 0, Math.PI * 2);
         ctx.fill();
+
         ctx.globalCompositeOperation = prevComposite;
         p.pop();
       }
@@ -466,14 +373,17 @@
         ctx.beginPath();
         for (let i = 0; i <= steps; i++) {
           const angle = (i / steps) * Math.PI * 2;
+          // Sample noise in a circle so the shape is closed and consistent
           const n = p.noise(
             Math.cos(angle) * 0.9 + this.shapeOffset,
             Math.sin(angle) * 0.9 + this.shapeOffset + 200
           );
           const distortion = (n - 0.5) * r * 0.22;
           const rad = r + distortion;
-          if (i === 0) ctx.moveTo(Math.cos(angle) * rad, Math.sin(angle) * rad);
-          else ctx.lineTo(Math.cos(angle) * rad, Math.sin(angle) * rad);
+          const px = Math.cos(angle) * rad;
+          const py = Math.sin(angle) * rad;
+          if (i === 0) ctx.moveTo(px, py);
+          else ctx.lineTo(px, py);
         }
         ctx.closePath();
       }
@@ -481,34 +391,47 @@
       drawCircle(p) {
         p.push();
         p.translate(this.x, this.y);
+
         const ctx = p.drawingContext;
         ctx.save();
         this.buildOrganicPath(ctx, p, this.radius);
         ctx.clip();
+
         if (this.image) {
-          const iw = this.image.width, ih = this.image.height;
+          const iw = this.image.width;
+          const ih = this.image.height;
           const target = CONFIG.IMG_DRAW_SIZE * 1.1;
           const scale = Math.max(target / iw, target / ih);
-          p.image(this.image, -iw * scale / 2, -ih * scale / 2, iw * scale, ih * scale);
+          const w = iw * scale, h = ih * scale;
+          p.image(this.image, -w / 2, -h / 2, w, h);
         } else {
           const [r, g, b] = this.baseColor;
           p.fill(r, g, b, 200);
           p.noStroke();
           p.circle(0, 0, this.radius * 2);
         }
+
         ctx.restore();
+
+        // Organic rim — trace the same wobbly path
         p.noFill();
         const [cr, cg, cb] = CONFIG.CREAM;
         p.stroke(cr, cg, cb, this.expanded ? 50 : 22);
         p.strokeWeight(1);
         p.beginShape();
-        for (let i = 0; i <= 64; i++) {
-          const angle = (i / 64) * Math.PI * 2;
-          const n = p.noise(Math.cos(angle) * 0.9 + this.shapeOffset, Math.sin(angle) * 0.9 + this.shapeOffset + 200);
-          const rad = this.radius + (n - 0.5) * this.radius * 0.22;
+        const steps = 64;
+        for (let i = 0; i <= steps; i++) {
+          const angle = (i / steps) * Math.PI * 2;
+          const n = p.noise(
+            Math.cos(angle) * 0.9 + this.shapeOffset,
+            Math.sin(angle) * 0.9 + this.shapeOffset + 200
+          );
+          const distortion = (n - 0.5) * this.radius * 0.22;
+          const rad = this.radius + distortion;
           p.curveVertex(Math.cos(angle) * rad, Math.sin(angle) * rad);
         }
         p.endShape(p.CLOSE);
+
         p.pop();
       }
 
@@ -524,43 +447,25 @@
         p.text(this.title.toUpperCase(), this.x, this.y + this.radius + 14);
       }
 
-      drawTimestamp(p, color, isCurrentPage) {
+      drawTimestamp(p) {
         if (!this.timestamp) return;
         p.blendMode(p.BLEND);
         const [cr, cg, cb] = CONFIG.CREAM;
+        p.fill(cr, cg, cb, 178);
         p.noStroke();
         p.textFont('Jost');
         p.textSize(8);
         p.textStyle(p.NORMAL);
         p.textAlign(p.CENTER, p.TOP);
+        // Format: "20 Nov 2025 · 22:26"
+        // Format: "20251120-234408" → "20 Nov @ 23:44"
         const m = this.timestamp.match(/^(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})/);
         const label = m
           ? new Date(+m[1], +m[2]-1, +m[3], +m[4], +m[5])
-              .toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }) + '  |  ' + `${m[4]}:${m[5]}`
+              .toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }) + '  |  ' +
+            `${m[4]}:${m[5]}`
           : this.timestamp;
-        const textY = this.y + this.radius + 6;
-        // Colored dot left of date
-        if (color) {
-          const tw = p.textWidth(label);
-          const [r, g, b] = color;
-          const dotAlpha = isCurrentPage !== false ? 210 : 65;
-          p.fill(r, g, b, dotAlpha);
-          p.circle(this.x - tw / 2 - 7, textY + 4, 5);
-        }
-        p.fill(cr, cg, cb, 178);
-        p.text(label, this.x, textY);
-      }
-
-      drawKeyDot(p, color, isCurrentPage) {
-        p.push();
-        p.blendMode(p.BLEND);
-        const [r, g, b] = color;
-        const alpha = isCurrentPage ? (this.expanded ? 255 : 185) : 38;
-        p.fill(r, g, b, alpha);
-        p.noStroke();
-        const dotD = this.expanded ? 9 : 6;
-        p.circle(this.x, this.y - this.radius - 10, dotD);
-        p.pop();
+        p.text(label, this.x, this.y + this.radius + 6);
       }
 
       hitTest(px, py) {
@@ -605,6 +510,7 @@
         }
         return rows;
       },
+
       splitLines(text) {
         const lines = [];
         let currentLine = "", inQuotes = false;
@@ -622,6 +528,7 @@
         if (currentLine.trim()) lines.push(currentLine.replace(/\r$/, ""));
         return lines;
       },
+
       parseRow(line) {
         const result = [];
         let current = "", inQuotes = false;
@@ -656,7 +563,6 @@
           const n = Object.keys(lastFetchedRecords).length;
           const el = document.getElementById("memories-count");
           if (el) el.textContent = `${n} ${n === 1 ? "soundscape" : "soundscapes"}`;
-          updateKeyboardLegend();
         } catch (error) {
           console.error("Error fetching CSV:", error);
         }
@@ -684,7 +590,8 @@
             ? (localPath(row.text_local, "texts") || row.text_url)
             : (row.text_url?.trim() || localPath(row.text_local, "texts"));
           records[id] = {
-            id, title: row.title?.trim() || "",
+            id,
+            title:     row.title?.trim()     || "",
             timestamp: row.timestamp?.trim() || "",
             imageUrl, audioUrl, textUrl,
             description: [row.analysis, row.long_prompt]
@@ -696,7 +603,11 @@
 
       syncBubbles(records) {
         state.bubbles = state.bubbles.filter(bubble => {
-          if (!records[bubble.id]) { bubble.cleanup(); delete state.bubblesById[bubble.id]; return false; }
+          if (!records[bubble.id]) {
+            bubble.cleanup();
+            delete state.bubblesById[bubble.id];
+            return false;
+          }
           return true;
         });
         for (const id in records) {
@@ -708,6 +619,7 @@
             state.bubblesById[id] = bubble;
           }
         }
+        console.log(`Synced bubbles: ${state.bubbles.length}`);
       },
 
       async fetchPending() {
@@ -718,50 +630,30 @@
           const now = Date.now();
           const active = entries.filter(e => now - new Date(e.started).getTime() < CONFIG.PENDING_MAX_AGE_MS);
           this.syncGhosts(active.length);
-        } catch { this.syncGhosts(0); }
+        } catch {
+          this.syncGhosts(0);
+        }
       },
 
       syncGhosts(count) {
         if (state.ghostBubbles.length === count) return;
+        // Rebuild ghost array with top-of-screen positions
         state.ghostBubbles = Array.from({ length: count }, (_, i) => {
           const spread = window.innerWidth / (count + 1);
           return {
-            x: spread * (i + 1), y: randomRange(55, 100),
+            x: spread * (i + 1),
+            y: randomRange(55, 100),
             shapeOffset: Math.random() * 500,
             breathPhase: Math.random() * Math.PI * 2,
-            breathSpeed: 0.007, breathAmt: 3, baseRadius: 30, radius: 30,
+            breathSpeed: 0.007,
+            breathAmt: 3,
+            baseRadius: 30,
+            radius: 30,
             blinkPhase: Math.random() * Math.PI * 2
           };
         });
       }
     };
-
-    // ==============================
-    // KEYBOARD HANDLER
-    // ==============================
-    document.addEventListener('keydown', e => {
-      if (e.repeat) return;
-      if (e.key === ' ') {
-        e.preventDefault();
-        const sorted = orderedBubbles();
-        const totalPages = Math.max(1, Math.ceil(sorted.length / KEYS_PER_PAGE));
-        if (totalPages > 1) {
-          currentPage = (currentPage + 1) % totalPages;
-          updateKeyboardLegend();
-        }
-        return;
-      }
-      const bubble = getBubbleForKey(e.key);
-      if (bubble) {
-        e.preventDefault();
-        bubble.setExpanded(true);
-      }
-    });
-
-    document.addEventListener('keyup', e => {
-      const bubble = getBubbleForKey(e.key);
-      if (bubble) bubble.setExpanded(false);
-    });
 
     // ==============================
     // INTERACTION HANDLERS
@@ -779,6 +671,7 @@
           }
         }
       },
+
       onMouseDragged(p) {
         if (state.drag.target) {
           state.drag.moved = true;
@@ -788,6 +681,7 @@
           state.drag.target.vy = 0;
         }
       },
+
       onMouseReleased(p) {
         if (!state.drag.target) return;
         const dx = p.mouseX - state.drag.startX;
@@ -809,6 +703,7 @@
     // P5.JS SKETCH
     // ==============================
     new p5(p => {
+      let offscreen;
       let imgVertical;
 
       p.preload = () => {
@@ -819,6 +714,7 @@
         state.p5Instance = p;
         const canvas = p.createCanvas(window.innerWidth, window.innerHeight);
         canvas.parent("p5-container");
+        offscreen = p.createGraphics(window.innerWidth, window.innerHeight);
         p.frameRate(60);
         p.textFont('Jost');
         DataManager.fetchRecords();
@@ -827,52 +723,63 @@
       };
 
       p.windowResized = () => {
-        const scaleX = window.innerWidth / p.width;
+        const scaleX = window.innerWidth  / p.width;
         const scaleY = window.innerHeight / p.height;
         p.resizeCanvas(window.innerWidth, window.innerHeight);
+        offscreen = p.createGraphics(window.innerWidth, window.innerHeight);
         state.bubbles.forEach(b => { b.x *= scaleX; b.y *= scaleY; });
       };
 
       p.draw = () => {
         const [r, g, b] = CONFIG.BG;
+
+        // 1. Near-black background
         p.background(r, g, b);
 
-        // Spotlights
-        state.bubbles.forEach(bubble => { bubble.update(); bubble.drawSpotlight(p); });
+        // 2. Spotlights — each bubble reveals a pool of olive light beneath it
+        state.bubbles.forEach(bubble => {
+          bubble.update();
+          bubble.drawSpotlight(p);
+        });
 
-        // Ink asset
+        // 3. Ink asset — vertical_hope_33.png, tall on left
+        // RGBA asset with dark ink: tint to cream so it's visible on near-black background
         if (imgVertical) {
+          const [cr, cg, cb] = CONFIG.CREAM;
           p.tint(255);
+
           const vS = (p.height * 1.55) / imgVertical.height;
           const vW = imgVertical.width * vS;
           const vH = imgVertical.height * vS;
           p.image(imgVertical, -vW * 0.12, p.height - vH * 0.95, vW, vH);
+
           p.noTint();
         }
 
-        // Ghost spotlights
+        // Ghost spotlights for pending generations
         state.ghostBubbles.forEach(g => {
           g.breathPhase += g.breathSpeed;
           g.blinkPhase  += 0.018;
           g.radius = g.baseRadius + Math.sin(g.breathPhase) * g.breathAmt;
+
           const ctx = p.drawingContext;
           const prev = ctx.globalCompositeOperation;
           ctx.globalCompositeOperation = 'lighter';
           const spotR = g.radius * 4;
           const [or, og, ob] = CONFIG.OLIVE;
-          const a = 0.12 + Math.sin(g.blinkPhase) * 0.06;
+          const a = (0.12 + Math.sin(g.blinkPhase) * 0.06);
           const grad = ctx.createRadialGradient(g.x, g.y, g.radius * 0.1, g.x, g.y, spotR);
-          grad.addColorStop(0, `rgba(${or},${og},${ob},${a})`);
-          grad.addColorStop(1, `rgba(${or},${og},${ob},0)`);
+          grad.addColorStop(0,   `rgba(${or},${og},${ob},${a})`);
+          grad.addColorStop(1,   `rgba(${or},${og},${ob},0)`);
           ctx.fillStyle = grad;
           ctx.beginPath(); ctx.arc(g.x, g.y, spotR, 0, Math.PI * 2); ctx.fill();
           ctx.globalCompositeOperation = prev;
         });
 
-        // Bubble circles
+        // Draw bubble circles with MULTIPLY — white backgrounds disappear into the scene
         state.bubbles.forEach(bubble => bubble.drawCircle(p));
 
-        // Ghost circles
+        // Ghost bubble circles
         state.ghostBubbles.forEach(g => {
           p.push();
           p.translate(g.x, g.y);
@@ -884,8 +791,8 @@
             const angle = (i / steps) * Math.PI * 2;
             const n = p.noise(Math.cos(angle) * 0.9 + g.shapeOffset, Math.sin(angle) * 0.9 + g.shapeOffset + 200);
             const rad = g.radius + (n - 0.5) * g.radius * 0.22;
-            const gx = Math.cos(angle) * rad, gy = Math.sin(angle) * rad;
-            if (i === 0) ctx.moveTo(gx, gy); else ctx.lineTo(gx, gy);
+            const px = Math.cos(angle) * rad, py = Math.sin(angle) * rad;
+            if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
           }
           ctx.closePath();
           const alpha = 0.12 + Math.sin(g.blinkPhase) * 0.08;
@@ -896,8 +803,10 @@
           ctx.stroke();
           ctx.restore();
           p.pop();
+
+          // "Generating…" label beneath
           const [cr, cg, cb] = CONFIG.CREAM;
-          p.fill(cr, cg, cb, Math.floor(alpha * 255));
+          p.fill(cr, cg, cb, Math.floor((0.12 + Math.sin(g.blinkPhase) * 0.08) * 255));
           p.noStroke();
           p.textSize(7);
           p.textStyle(p.NORMAL);
@@ -905,21 +814,13 @@
           p.text("GENERATING", g.x, g.y + g.radius + 6);
         });
 
-        // Labels + color dots
-        const sorted = orderedBubbles();
-        sorted.forEach((bubble, globalIndex) => {
-          const page = Math.floor(globalIndex / KEYS_PER_PAGE);
-          const keyIndex = globalIndex % KEYS_PER_PAGE;
-          const color = KEY_COLORS[keyIndex];
-          const isCurrentPage = page === currentPage;
-          if (bubble.expanded) {
-            bubble.drawLabel(p);
-          } else {
-            bubble.drawTimestamp(p, color, isCurrentPage);
-          }
+        // Labels on top
+        state.bubbles.forEach(bubble => {
+          if (bubble.expanded) bubble.drawLabel(p);
+          else bubble.drawTimestamp(p);
         });
 
-        // Empty state
+        // Empty state message
         if (state.bubbles.length === 0) {
           const [cr, cg, cb] = CONFIG.CREAM;
           p.noStroke();
