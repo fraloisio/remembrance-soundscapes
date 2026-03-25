@@ -1,0 +1,9 @@
+ID: 13
+TITLE: Shattered Peace: Denmark Under Occupation
+TIMESTAMP (UTC): 20260325-113622
+
+ANALYSIS:
+An open notebook displays a black-and-white historical photo of soldiers in a chaotic scene, with handwritten German text describing Denmark’s occupation during Nazi rule. Below, childlike pencil drawings depict airplanes, buildings, and a Danish flag, with some colored accents in red and yellow.
+
+LONG PROMPT:
+Design a tense, layered soundscape blending distant machinery, fragmented urban bustle, and a haunting wind whistle to evoke occupied silence, punctuated by sudden metallic clangs and muffled voices drifting from an unseen horizon.
