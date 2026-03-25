@@ -211,12 +211,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
     try {
       const HF_SPACE = "quirkythings/remembrance-soundscapes";
+      console.log("[uploader] Connecting to", HF_SPACE);
       const client = await Client.connect(HF_SPACE);
+      console.log("[uploader] Connected. Submitting...");
       const job = client.submit("/pipeline_from_image", [file]);
 
       let audioRes, metaRes;
 
       for await (const msg of job) {
+        console.log("[uploader] msg type=" + msg.type, JSON.stringify(msg).slice(0, 300));
         if (msg.type === "status") {
           const s = msg.data;
           if (s.status === "in_queue" && s.position != null) {
