@@ -363,7 +363,7 @@
 <script>
 // ── Config ──────────────────────────────────────────────────────────────────
 const GITHUB_OWNER = 'fraloisio';
-const GITHUB_REPO  = 'sonic-runs-assets';
+const GITHUB_REPO  = 'remembrance-soundscapes';
 const GITHUB_BRANCH = 'main';
 const RAW_BASE = `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/${GITHUB_BRANCH}/`;
 const API_BASE = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/`;
@@ -585,7 +585,7 @@ async function confirmDelete(id) {
 }
 
 function urlToPath(rawUrl) {
-  // https://raw.githubusercontent.com/fraloisio/sonic-runs-assets/main/images/0001-…png
+  // https://raw.githubusercontent.com/fraloisio/remembrance-soundscapes/main/images/0001-…png
   //  → images/0001-…png
   const prefix = `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/${GITHUB_BRANCH}/`;
   return rawUrl.startsWith(prefix) ? rawUrl.slice(prefix.length) : rawUrl;
