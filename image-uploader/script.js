@@ -1,4 +1,4 @@
-import { Client } from "https://cdn.jsdelivr.net/npm/@gradio/client@1.9.0/dist/index.min.js";
+import { Client } from "https://cdn.jsdelivr.net/npm/@gradio/client@1.15.0/dist/index.min.js";
 
 let FAKE_MODE = false;
 let selectedFile = null;
