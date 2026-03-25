@@ -1,5 +1,4 @@
-// No third-party client — raw Gradio 5 REST API + EventSource
-const SPACE = "https://quirkythings-remembrance-soundscapes.hf.space";
+import { Client } from "https://cdn.jsdelivr.net/npm/@gradio/client@1.10.0/dist/index.min.js";
 
 let FAKE_MODE = false;
 let selectedFile = null;
@@ -42,15 +41,6 @@ async function compressImage(file) {
   }
 }
 
-// ——————————————————————————
-// Resolve Gradio file → URL
-// ——————————————————————————
-function resolveFileUrl(fileData) {
-  if (!fileData) return "";
-  if (fileData.url) return fileData.url;
-  if (fileData.path) return `${SPACE}/file=${fileData.path}`;
-  return "";
-}
 
 function syncFakeCheckboxes(value) {
   ["fake-toggle", "fake-toggle-2", "fake-toggle-3"].forEach(id => {
@@ -216,133 +206,61 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     try {
-      // ── Step 1: encode file as base64 (API accepts base64 data URLs as `url`) ──
-      loadingText.innerHTML = "Preparing image…";
+      const HF_SPACE = "quirkythings/remembrance-soundscapes";
+      loadingText.innerHTML = "Connecting…";
       queueStatus.textContent = "";
       progressBar.classList.remove("active");
 
-      const dataUrl = await new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-      console.log("[uploader] Encoded as base64, size ~", Math.round(dataUrl.length / 1024), "KB");
+      console.log("[uploader] Connecting to", HF_SPACE);
+      const client = await Client.connect(HF_SPACE);
+      console.log("[uploader] Connected. Submitting...");
+      loadingText.innerHTML = "Your image is in the queue.<br>Sound will begin soon.";
 
-      // ── Step 2: submit job ──
-      loadingText.innerHTML = "Submitting to queue…";
+      const job = client.submit("/pipeline_from_image", [file]);
 
-      const subRes = await fetch(`${SPACE}/call/pipeline_from_image`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          data: [{
-            url: dataUrl,
-            orig_name: file.name,
-            mime_type: file.type,
-            meta: { "_type": "gradio.FileData" }
-          }]
-        })
-      });
-      if (!subRes.ok) throw new Error(`Submit failed (${subRes.status}): ${await subRes.text()}`);
-      const { event_id } = await subRes.json();
-      console.log("[uploader] event_id:", event_id);
+      let audioRes, metaRes;
 
-      // ── Step 3: stream results via SSE ──
-      const resultData = await new Promise((resolve, reject) => {
-        const es = new EventSource(`${SPACE}/call/pipeline_from_image/${event_id}`);
-
-        es.addEventListener("heartbeat", () => {
-          console.log("[uploader] heartbeat");
-          if (!processingStart) {
-            loadingText.innerHTML = "Your image is in the queue.<br>Sound will begin soon.";
-          }
-        });
-
-        ["estimation", "queue_position"].forEach(evName => {
-          es.addEventListener(evName, (e) => {
-            try {
-              const d = JSON.parse(e.data);
-              console.log(`[uploader] ${evName}:`, d);
-              const pos = d.queue_size ?? d.rank ?? d.position;
-              if (pos != null) {
-                queueStatus.textContent = pos === 0
-                  ? "Next in line"
-                  : `${pos} ${pos === 1 ? "person" : "people"} ahead of you`;
-              }
+      for await (const msg of job) {
+        console.log("[uploader] msg type=" + msg.type, JSON.stringify(msg).slice(0, 300));
+        if (msg.type === "status") {
+          const s = msg.data;
+          if (s.status === "in_queue" && s.position != null) {
+            stopElapsedTimer();
+            const pos = s.position;
+            queueStatus.textContent = pos === 0 ? "Next in line" : `${pos} ${pos === 1 ? "person" : "people"} ahead of you`;
+            if (s.eta != null && s.eta > 0) {
+              const mins = Math.floor(s.eta / 60);
+              const secs = Math.round(s.eta % 60);
+              const etaStr = mins > 0 ? `~${mins}m ${secs}s` : `~${secs}s`;
+              loadingText.innerHTML = `Your image is in the queue.<br>Expected wait: ${etaStr}.`;
+            } else {
               loadingText.innerHTML = "Your image is in the queue.<br>Sound will begin soon.";
-              progressBar.classList.remove("active");
-            } catch {}
-          });
-        });
-
-        ["process_starts", "process_generating", "generating"].forEach(evName => {
-          es.addEventListener(evName, (e) => {
-            console.log(`[uploader] ${evName}`);
+            }
+            progressBar.classList.remove("active");
+          } else {
             queueStatus.textContent = "";
-            if (!processingStart) startElapsedTimer();
+            if (!processingStart) {
+              startElapsedTimer();
+              loadingText.innerHTML = `Listening to your image.<br>Translating memory into sound.<br><span style="opacity:0.5" id="elapsed-span"></span>`;
+            }
             progressBar.classList.add("active");
-            loadingText.innerHTML = `Listening to your image.<br>Translating memory into sound.<br><span style="opacity:0.5" id="elapsed-span"></span>`;
-          });
-        });
-
-        ["complete", "process_completed"].forEach(evName => {
-          es.addEventListener(evName, (e) => {
-            console.log(`[uploader] ${evName}:`, e.data?.slice(0, 300));
-            es.close();
-            try {
-              const d = JSON.parse(e.data);
-              // Gradio 5 /call/ returns array directly: [audioFile, metaFile]
-              if (Array.isArray(d)) { resolve(d); return; }
-              if (d.output?.data) { resolve(d.output.data); return; }
-              if (d.data) { resolve(d.data); return; }
-              reject(new Error("Unrecognised completion format"));
-            } catch (err) {
-              reject(err);
-            }
-          });
-        });
-
-        ["error", "process_error"].forEach(evName => {
-          es.addEventListener(evName, (e) => {
-            es.close();
-            console.error(`[uploader] ${evName}:`, e.data);
-            try {
-              const d = JSON.parse(e.data);
-              reject(new Error(d.message || d.error || "Server error"));
-            } catch {
-              reject(new Error("Server error"));
-            }
-          });
-        });
-
-        // Catch-all for unnamed SSE messages
-        es.onmessage = (e) => {
-          console.log("[uploader] onmessage:", e.data?.slice(0, 300));
-          try {
-            const d = JSON.parse(e.data);
-            if (d.error) { es.close(); reject(new Error(d.error)); return; }
-            if (Array.isArray(d)) { es.close(); resolve(d); return; }
-            if (d.output?.data && !d.is_generating) { es.close(); resolve(d.output.data); return; }
-          } catch {}
-        };
-
-        es.onerror = (e) => {
-          console.error("[uploader] EventSource error:", e);
-          es.close();
-          reject(new Error("Lost connection to server — check the Space logs."));
-        };
-      });
-
+          }
+        } else if (msg.type === "error") {
+          throw new Error(msg.message || msg.data?.message || "Server error");
+        } else if (msg.type === "data") {
+          [audioRes, metaRes] = msg.data;
+          stopElapsedTimer();
+          break;
+        }
+      }
       stopElapsedTimer();
 
-      if (!resultData || resultData.length < 2) {
+      if (!audioRes && !metaRes) {
         throw new Error("No result returned — the pipeline may have timed out or crashed.");
       }
 
-      const [audioRes, metaRes] = resultData;
-      const audioUrl    = resolveFileUrl(audioRes);
-      const metadataUrl = resolveFileUrl(metaRes);
+      const audioUrl    = audioRes?.url || audioRes?.path || "";
+      const metadataUrl = metaRes?.url  || metaRes?.path  || "";
 
       outputImage.src   = URL.createObjectURL(file);
       audioPlayer.src   = audioUrl;
