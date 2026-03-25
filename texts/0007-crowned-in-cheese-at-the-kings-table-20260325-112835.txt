@@ -1,0 +1,9 @@
+ID: 7
+TITLE: Crowned in Cheese at the King’s Table
+TIMESTAMP (UTC): 20260325-112835
+
+ANALYSIS:
+A young person with glasses and long hair wears a Burger King paper crown while seated at a fast-food table. Their hands rest on the table near food packaging, and another person’s arm and hand appear in the foreground, suggesting shared dining. The background shows vertical wood paneling and a neon sign through a window.
+
+LONG PROMPT:
+Design a warm, ambient soundscape with the rhythmic clink of cutlery, the soft rustle of paper bags, and distant chatter, layered with a gentle hum of restaurant HVAC and the occasional muffled sizzle from the kitchen, all anchored by a low, steady beat mimicking the heartbeat of a bustling eatery.
