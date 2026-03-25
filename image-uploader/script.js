@@ -3,6 +3,48 @@ import { Client } from "https://cdn.jsdelivr.net/npm/@gradio/client/dist/index.m
 let FAKE_MODE = false;
 let selectedFile = null;
 
+// ——————————————————————————
+// Image compression
+// ——————————————————————————
+const MAX_BYTES   = 750 * 1024;   // 750 KB
+const MAX_DIM     = 1920;          // longest side
+const QUALITIES   = [0.88, 0.80, 0.70, 0.60, 0.50];
+
+async function compressImage(file) {
+  // Skip tiny files
+  if (file.size <= MAX_BYTES) return file;
+
+  const bitmap = await createImageBitmap(file);
+  const { width: w, height: h } = bitmap;
+
+  // Scale down if needed
+  let dw = w, dh = h;
+  if (w > MAX_DIM || h > MAX_DIM) {
+    const ratio = Math.min(MAX_DIM / w, MAX_DIM / h);
+    dw = Math.round(w * ratio);
+    dh = Math.round(h * ratio);
+  }
+
+  const canvas = document.createElement("canvas");
+  canvas.width  = dw;
+  canvas.height = dh;
+  const ctx = canvas.getContext("2d");
+  // White background for images with transparency
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, dw, dh);
+  ctx.drawImage(bitmap, 0, 0, dw, dh);
+  bitmap.close();
+
+  // Try qualities until we fit
+  for (const q of QUALITIES) {
+    const blob = await new Promise(res => canvas.toBlob(res, "image/jpeg", q));
+    if (blob.size <= MAX_BYTES || q === QUALITIES.at(-1)) {
+      const baseName = file.name.replace(/\.[^.]+$/, "") + ".jpg";
+      return new File([blob], baseName, { type: "image/jpeg" });
+    }
+  }
+}
+
 function syncFakeCheckboxes(value) {
   ["fake-toggle", "fake-toggle-2", "fake-toggle-3"].forEach(id => {
     const el = document.getElementById(id);
@@ -67,11 +109,24 @@ document.addEventListener("DOMContentLoaded", () => {
   // ——————————————————————————
   // File selection
   // ——————————————————————————
-  function onFileSelected(file) {
+  async function onFileSelected(file) {
     if (!file) return;
-    selectedFile = file;
-    filenameDisplay.textContent = file.name;
+    btnGenerate.disabled = true;
+    filenameDisplay.textContent = "Preparing…";
     filenameDisplay.classList.add("visible");
+
+    const originalKB = Math.round(file.size / 1024);
+    const compressed = await compressImage(file);
+    const compressedKB = Math.round(compressed.size / 1024);
+
+    selectedFile = compressed;
+
+    if (compressed.size < file.size) {
+      filenameDisplay.textContent = `${compressed.name}  (${originalKB} KB → ${compressedKB} KB)`;
+    } else {
+      filenameDisplay.textContent = `${file.name}  (${originalKB} KB)`;
+    }
+
     btnGenerate.disabled = false;
   }
 
