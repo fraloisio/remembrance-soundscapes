@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Uploaded Images — Hope &amp; Despair</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Jost:wght@200;400;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #080b07;
+      color: #e8d7be;
+      font-family: 'Jost', sans-serif;
+      min-height: 100vh;
+    }
+
+    header {
+      padding: 2.4rem 2rem 1.2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      border-bottom: 1px solid rgba(232,215,190,0.08);
+    }
+
+    .brand {
+      font-size: 0.68rem;
+      font-weight: 900;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .tagline {
+      display: block;
+      font-size: 0.52rem;
+      font-weight: 200;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+      opacity: 0.55;
+      margin-top: 0.3rem;
+    }
+
+    .count {
+      font-size: 0.58rem;
+      font-weight: 200;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      opacity: 0.55;
+    }
+
+    main {
+      padding: 2rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .card {
+      background: rgba(232,215,190,0.03);
+      border: 1px solid rgba(232,215,190,0.07);
+      overflow: hidden;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .card:hover {
+      border-color: rgba(232,215,190,0.22);
+      background: rgba(232,215,190,0.06);
+    }
+
+    .card img {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      object-fit: cover;
+      display: block;
+      filter: grayscale(15%);
+      transition: filter 0.3s;
+    }
+
+    .card:hover img {
+      filter: grayscale(0%);
+    }
+
+    .card-info {
+      padding: 0.75rem 0.9rem 0.85rem;
+    }
+
+    .card-title {
+      font-size: 0.62rem;
+      font-weight: 400;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      opacity: 0.8;
+      margin: 0 0 0.3rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .card-timestamp {
+      font-size: 0.5rem;
+      font-weight: 200;
+      letter-spacing: 0.1em;
+      opacity: 0.4;
+      margin: 0;
+    }
+
+    /* Lightbox */
+    #lightbox {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(8,11,7,0.93);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 1.2rem;
+      cursor: zoom-out;
+    }
+
+    #lightbox.open {
+      display: flex;
+    }
+
+    #lightbox img {
+      max-width: min(90vw, 800px);
+      max-height: 80vh;
+      object-fit: contain;
+      box-shadow: 0 0 80px rgba(0,0,0,0.8);
+    }
+
+    #lightbox-title {
+      font-size: 0.65rem;
+      font-weight: 200;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      opacity: 0.65;
+    }
+
+    #lightbox-close {
+      position: fixed;
+      top: 1.4rem;
+      right: 1.6rem;
+      font-size: 0.6rem;
+      font-weight: 200;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      opacity: 0.5;
+      cursor: pointer;
+      background: none;
+      border: none;
+      color: #e8d7be;
+    }
+
+    #lightbox-close:hover { opacity: 1; }
+
+    /* Grain overlay */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.05;
+      background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='250' height='250'><filter id='g'><feTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='250' height='250' filter='url(%23g)'/></svg>");
+      z-index: 200;
+    }
+
+    .empty {
+      font-size: 0.65rem;
+      font-weight: 200;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      opacity: 0.35;
+      padding: 4rem 0;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div>
+      <span class="brand">Hope &amp; Despair</span>
+      <span class="tagline">Uploaded Images</span>
+    </div>
+    <span class="count" id="count"></span>
+  </header>
+
+  <main>
+    <div class="grid" id="grid">
+      <p class="empty">Loading…</p>
+    </div>
+  </main>
+
+  <div id="lightbox">
+    <button id="lightbox-close">Close</button>
+    <img id="lightbox-img" src="" alt="" />
+    <span id="lightbox-title"></span>
+  </div>
+
+  <script>
+    const CSV_URL = "https://fraloisio.github.io/sonic-runs-assets/records.csv";
+
+    function parseCSV(text) {
+      const lines = [];
+      let cur = "", inQ = false;
+      for (let i = 0; i < text.length; i++) {
+        const ch = text[i];
+        if (ch === '"') {
+          cur += ch;
+          if (inQ && text[i+1] === '"') { cur += text[++i]; }
+          else { inQ = !inQ; }
+        } else if (ch === "\n" && !inQ) {
+          lines.push(cur.replace(/\r$/, ""));
+          cur = "";
+        } else { cur += ch; }
+      }
+      if (cur.trim()) lines.push(cur.replace(/\r$/, ""));
+
+      if (!lines.length) return [];
+      const headers = parseRow(lines[0]).map(h => h.trim().toLowerCase());
+      return lines.slice(1).filter(l => l.trim()).map(l => {
+        const cols = parseRow(l);
+        const row = {};
+        headers.forEach((h, i) => row[h] = cols[i] || "");
+        return row;
+      });
+    }
+
+    function parseRow(line) {
+      const result = [];
+      let cur = "", inQ = false;
+      for (let i = 0; i < line.length; i++) {
+        const ch = line[i];
+        if (ch === '"') {
+          if (inQ && line[i+1] === '"') { cur += '"'; i++; }
+          else { inQ = !inQ; }
+        } else if (ch === ',' && !inQ) { result.push(cur); cur = ""; }
+        else { cur += ch; }
+      }
+      result.push(cur);
+      return result;
+    }
+
+    function formatTimestamp(ts) {
+      const m = ts.match(/^(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})/);
+      if (!m) return ts;
+      return new Date(+m[1], +m[2]-1, +m[3], +m[4], +m[5])
+        .toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+        + '  ·  ' + m[4] + ':' + m[5];
+    }
+
+    async function load() {
+      const grid = document.getElementById("grid");
+      const countEl = document.getElementById("count");
+
+      try {
+        const resp = await fetch(CSV_URL + "?t=" + Date.now(), { cache: "no-store" });
+        if (!resp.ok) throw new Error("HTTP " + resp.status);
+        const rows = parseCSV(await resp.text());
+
+        const records = rows.filter(r => r.id && /^\d+/.test(r.id.trim()) && r.image_url?.trim());
+
+        if (!records.length) {
+          grid.innerHTML = '<p class="empty">No images found.</p>';
+          return;
+        }
+
+        countEl.textContent = records.length + " " + (records.length === 1 ? "image" : "images");
+        grid.innerHTML = "";
+
+        records.forEach(r => {
+          const card = document.createElement("div");
+          card.className = "card";
+          card.innerHTML = `
+            <img src="${r.image_url.trim()}" alt="${r.title?.trim() || ""}" loading="lazy" />
+            <div class="card-info">
+              <p class="card-title">${r.title?.trim() || "Untitled"}</p>
+              <p class="card-timestamp">${formatTimestamp(r.timestamp?.trim() || "")}</p>
+            </div>
+          `;
+          card.addEventListener("click", () => openLightbox(r.image_url.trim(), r.title?.trim() || ""));
+          grid.appendChild(card);
+        });
+      } catch (e) {
+        grid.innerHTML = '<p class="empty">Could not load images.</p>';
+        console.error(e);
+      }
+    }
+
+    function openLightbox(src, title) {
+      document.getElementById("lightbox-img").src = src;
+      document.getElementById("lightbox-title").textContent = title.toUpperCase();
+      document.getElementById("lightbox").classList.add("open");
+    }
+
+    function closeLightbox() {
+      document.getElementById("lightbox").classList.remove("open");
+      document.getElementById("lightbox-img").src = "";
+    }
+
+    document.getElementById("lightbox").addEventListener("click", closeLightbox);
+    document.getElementById("lightbox-close").addEventListener("click", e => { e.stopPropagation(); closeLightbox(); });
+    document.addEventListener("keydown", e => { if (e.key === "Escape") closeLightbox(); });
+
+    load();
+  </script>
+</body>
+</html>
