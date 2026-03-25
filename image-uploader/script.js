@@ -186,35 +186,35 @@ document.addEventListener("DOMContentLoaded", () => {
     show(screenLoading);
     if (FAKE_MODE) return runFakeMode(file);
 
+    let processingStart = null;
+    let elapsedTimer = null;
+
+    function startElapsedTimer() {
+      processingStart = Date.now();
+      elapsedTimer = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - processingStart) / 1000);
+        const mins = Math.floor(elapsed / 60);
+        const secs = elapsed % 60;
+        const elapsedStr = mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
+        const span = document.getElementById("elapsed-span");
+        if (span) {
+          span.textContent = elapsedStr;
+        } else {
+          loadingText.innerHTML = `Listening to your image.<br>Translating memory into sound.<br><span style="opacity:0.5">${elapsedStr}</span>`;
+        }
+      }, 1000);
+    }
+
+    function stopElapsedTimer() {
+      if (elapsedTimer) { clearInterval(elapsedTimer); elapsedTimer = null; }
+    }
+
     try {
       const HF_SPACE = "quirkythings/remembrance-soundscapes";
       const client = await Client.connect(HF_SPACE);
       const job = client.submit("/pipeline_from_image", [file]);
 
       let audioRes, metaRes;
-      let processingStart = null;
-      let elapsedTimer = null;
-
-      function startElapsedTimer() {
-        processingStart = Date.now();
-        elapsedTimer = setInterval(() => {
-          const elapsed = Math.floor((Date.now() - processingStart) / 1000);
-          const mins = Math.floor(elapsed / 60);
-          const secs = elapsed % 60;
-          const elapsedStr = mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
-          // Update elapsed span if phase text is showing, else full line
-          const span = document.getElementById("elapsed-span");
-          if (span) {
-            span.textContent = elapsedStr;
-          } else {
-            loadingText.innerHTML = `Listening to your image.<br>Translating memory into sound.<br><span style="opacity:0.5">${elapsedStr}</span>`;
-          }
-        }, 1000);
-      }
-
-      function stopElapsedTimer() {
-        if (elapsedTimer) { clearInterval(elapsedTimer); elapsedTimer = null; }
-      }
 
       for await (const msg of job) {
         if (msg.type === "status") {
