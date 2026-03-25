@@ -1,0 +1,9 @@
+ID: 14
+TITLE: Hitler’s Flying Bomb Propaganda Poster
+TIMESTAMP (UTC): 20260325-113710
+
+ANALYSIS:
+A hand-drawn, vintage-style poster depicts a futuristic bomb with technical annotations, overlaid with a Nazi officer’s cap and handwritten notes. The background is filled with Danish text from a wartime newspaper clipping, creating a collage effect. The design suggests a satirical or propaganda piece from WWII-era Denmark.
+
+LONG PROMPT:
+Design a tense, mechanical soundscape with metallic clanks, ticking gears, and distant radio static, layered with a low, ominous drone and sudden bursts of distorted speech — all spatially panned to evoke a sense of looming, industrial threat from above.
