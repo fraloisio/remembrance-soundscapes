@@ -1,0 +1,9 @@
+ID: 20
+TITLE: Fragmented Broadcast from a War-Torn Era
+TIMESTAMP (UTC): 20260325-114152
+
+ANALYSIS:
+A collage of torn paper fragments shows Danish text about England’s wartime situation, alongside a Danish flag, Nazi imagery, and black-and-white photos of men. Sketches of houses and a bomb are interspersed with torn headlines and headlines, creating a chaotic, layered wartime scrapbook.
+
+LONG PROMPT:
+Design a layered, gritty soundscape of crackling radio static, distant warplanes, and urgent voice snippets in Danish, fading into the rhythmic thud of bombs and the metallic scrape of tearing paper, all wrapped in a disorienting spatial drift between near and far.
