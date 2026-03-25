@@ -1,0 +1,9 @@
+ID: 17
+TITLE: Echoes of Forgotten War
+TIMESTAMP (UTC): 20260325-113929
+
+ANALYSIS:
+A collage of black-and-white wartime photographs and torn newspaper clippings is assembled on aged paper, featuring soldiers, civilians, and headlines in Danish and German. Text fragments like “VERGESSEN?” (“Forgotten?”) and “SCHWEIGEN” (“Silence”) are layered over images of trenches, crowds, and portraits, creating a fragmented memorial of trauma and loss. The physical medium shows glue stains, creases, and handwritten notes, evoking a tactile archive.
+
+LONG PROMPT:
+Design a haunting soundscape of overlapping whispers, distant artillery, and paper rustling, where voices fade into silence as if swallowed by history, layered with textured static that mimics old newspaper and the echo of footsteps down an endless corridor.
