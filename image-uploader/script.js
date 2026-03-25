@@ -242,6 +242,8 @@ document.addEventListener("DOMContentLoaded", () => {
               loadingText.innerHTML = `${phase}<br><span style="opacity:0.5" id="elapsed-span"></span>`;
             }
           }
+        } else if (msg.type === "error") {
+          throw new Error(msg.message || msg.data?.message || "Server error");
         } else if (msg.type === "data") {
           [audioRes, metaRes] = msg.data;
           stopElapsedTimer();
@@ -249,6 +251,11 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }
       stopElapsedTimer();
+
+      if (!audioRes && !metaRes) {
+        throw new Error("No result returned — the pipeline may have timed out or crashed. Check the Space logs.");
+      }
+
       const audioUrl    = audioRes?.url || audioRes?.path || "";
       const metadataUrl = metaRes?.url  || metaRes?.path  || "";
 
