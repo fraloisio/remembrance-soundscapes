@@ -1,0 +1,9 @@
+ID: 6
+TITLE: Fragments of War and Memory
+TIMESTAMP (UTC): 20260325-112653
+
+ANALYSIS:
+A collage of torn newspaper clippings and grainy black-and-white photographs depicts wartime scenes, including soldiers, crowds, and historical headlines. Text fragments in Norwegian reference Nazi Germany, the Reichswehr, and a 1943 broadcast, suggesting a focus on European conflict and propaganda. The scattered, layered pieces evoke a sense of historical fragmentation.
+
+LONG PROMPT:
+Craft a layered, somber soundscape with crackling paper textures, distant crowd murmurs, and the rhythmic pulse of wartime radio broadcasts—evoking dissonant memories unfolding across time and space.
