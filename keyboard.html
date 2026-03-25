@@ -209,10 +209,7 @@
       // Page indicator
       const pageEl = document.getElementById('page-indicator');
       if (totalPages > 1) {
-        const labels = Array.from({ length: totalPages }, (_, i) => {
-          const base = KEY_ORDER[0].toUpperCase();
-          return i === 0 ? base : `${base}${i + 1}`;
-        });
+        const labels = Array.from({ length: totalPages }, (_, i) => `Series ${i + 1}`);
         pageEl.innerHTML = labels.map((l, i) =>
           i === currentPage
             ? `<span style="color:rgba(232,215,190,0.75)">${l}</span>`
