@@ -216,19 +216,18 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     try {
-      // ── Step 1: upload file ──
-      loadingText.innerHTML = "Uploading image…";
+      // ── Step 1: encode file as base64 (API accepts base64 data URLs as `url`) ──
+      loadingText.innerHTML = "Preparing image…";
       queueStatus.textContent = "";
       progressBar.classList.remove("active");
 
-      console.log("[uploader] Uploading to", SPACE);
-      const fd = new FormData();
-      fd.append("files", file);
-      const upRes = await fetch(`${SPACE}/upload`, { method: "POST", body: fd });
-      if (!upRes.ok) throw new Error(`Upload failed (${upRes.status}): ${await upRes.text()}`);
-      const uploadedPaths = await upRes.json();
-      const uploadedPath = uploadedPaths[0];
-      console.log("[uploader] Uploaded:", uploadedPath);
+      const dataUrl = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+      console.log("[uploader] Encoded as base64, size ~", Math.round(dataUrl.length / 1024), "KB");
 
       // ── Step 2: submit job ──
       loadingText.innerHTML = "Submitting to queue…";
@@ -238,7 +237,7 @@ document.addEventListener("DOMContentLoaded", () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           data: [{
-            path: uploadedPath,
+            url: dataUrl,
             orig_name: file.name,
             mime_type: file.type,
             meta: { "_type": "gradio.FileData" }
