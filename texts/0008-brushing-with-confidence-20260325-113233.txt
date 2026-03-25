@@ -1,0 +1,9 @@
+ID: 8
+TITLE: Brushing With Confidence
+TIMESTAMP (UTC): 20260325-113233
+
+ANALYSIS:
+A young person with glasses is brushing teeth in a brightly lit bathroom with orange walls and cabinets. They hold a toothbrush in one hand and a small tube of toothpaste in the other, giving a thumbs-up gesture while looking at their reflection. A towel hangs on a rack in the background, and a white wall-mounted device is visible above the mirror.
+
+LONG PROMPT:
+Design a crisp, rhythmic sound of a toothbrush bristles scrubbing, punctuated by a quick, satisfying “pop” of toothpaste being squeezed, all layered with a warm, ambient hum that suggests a cozy, intimate space—like a bathroom at dawn—with subtle echo to imply a tiled room.
