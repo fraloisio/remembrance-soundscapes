@@ -116,7 +116,7 @@
 
   <div id="site-credit">
     <span class="brand">Hope &amp; Despair</span>
-    <span class="tagline">What does a memorial visit sound like?</span>
+    <span class="tagline">What Does Memory Sound Like?</span>
   </div>
   <div id="memories-count"></div>
 
@@ -150,7 +150,7 @@
       BASE_RADIUS_MAX: 42,
       EXPANDED_RADIUS: 220,
       FADE_DURATION_MS: 800,
-      LERP_SPEED: 0.075,
+      LERP_SPEED: 0.05,
       DRIFT_SPEED: { min: 0.07, max: 0.2 },
       IMG_DRAW_SIZE: 450,
       SPOTLIGHT_RADIUS_MULT: 6.5,
@@ -164,6 +164,14 @@
 
     const lerp = (a, b, t) => a + (b - a) * t;
     const randomRange = (min, max) => min + Math.random() * (max - min);
+
+    // Shared unit-circle table for the organic bubble outline — computed once
+    // instead of re-deriving cos/sin for every bubble on every frame.
+    const ORGANIC_STEPS = 64;
+    const ORGANIC_ANGLES = Array.from({ length: ORGANIC_STEPS + 1 }, (_, i) => {
+      const angle = (i / ORGANIC_STEPS) * Math.PI * 2;
+      return { cos: Math.cos(angle), sin: Math.sin(angle) };
+    });
 
     // ==============================
     // KEYBOARD STATE
@@ -461,19 +469,29 @@
         p.pop();
       }
 
-      buildOrganicPath(ctx, p, r) {
-        const steps = 64;
-        ctx.beginPath();
-        for (let i = 0; i <= steps; i++) {
-          const angle = (i / steps) * Math.PI * 2;
+      // Computes the noise-distorted outline once and returns the point list
+      // so both the clip path and the stroke rim can reuse it without
+      // re-sampling noise() twice per bubble per frame.
+      computeOrganicPoints(p, r) {
+        const points = new Array(ORGANIC_ANGLES.length);
+        for (let i = 0; i < ORGANIC_ANGLES.length; i++) {
+          const { cos, sin } = ORGANIC_ANGLES[i];
           const n = p.noise(
-            Math.cos(angle) * 0.9 + this.shapeOffset,
-            Math.sin(angle) * 0.9 + this.shapeOffset + 200
+            cos * 0.9 + this.shapeOffset,
+            sin * 0.9 + this.shapeOffset + 200
           );
-          const distortion = (n - 0.5) * r * 0.22;
-          const rad = r + distortion;
-          if (i === 0) ctx.moveTo(Math.cos(angle) * rad, Math.sin(angle) * rad);
-          else ctx.lineTo(Math.cos(angle) * rad, Math.sin(angle) * rad);
+          const rad = r + (n - 0.5) * r * 0.22;
+          points[i] = [cos * rad, sin * rad];
+        }
+        return points;
+      }
+
+      pathFromPoints(ctx, points) {
+        ctx.beginPath();
+        for (let i = 0; i < points.length; i++) {
+          const [px, py] = points[i];
+          if (i === 0) ctx.moveTo(px, py);
+          else ctx.lineTo(px, py);
         }
         ctx.closePath();
       }
@@ -482,12 +500,16 @@
         p.push();
         p.translate(this.x, this.y);
         const ctx = p.drawingContext;
+        const points = this.computeOrganicPoints(p, this.radius);
         ctx.save();
-        this.buildOrganicPath(ctx, p, this.radius);
+        this.pathFromPoints(ctx, points);
         ctx.clip();
         if (this.image) {
           const iw = this.image.width, ih = this.image.height;
-          const target = CONFIG.IMG_DRAW_SIZE * 1.1;
+          // Scale the drawn image with the bubble's current radius instead of
+          // always rendering it at full expanded size — a 12px idle bubble
+          // has no visual need to raster a ~500px image every frame.
+          const target = Math.max(60, this.radius * (CONFIG.IMG_DRAW_SIZE * 1.1 / CONFIG.EXPANDED_RADIUS));
           const scale = Math.max(target / iw, target / ih);
           p.image(this.image, -iw * scale / 2, -ih * scale / 2, iw * scale, ih * scale);
         } else {
@@ -502,11 +524,8 @@
         p.stroke(cr, cg, cb, this.expanded ? 50 : 22);
         p.strokeWeight(1);
         p.beginShape();
-        for (let i = 0; i <= 64; i++) {
-          const angle = (i / 64) * Math.PI * 2;
-          const n = p.noise(Math.cos(angle) * 0.9 + this.shapeOffset, Math.sin(angle) * 0.9 + this.shapeOffset + 200);
-          const rad = this.radius + (n - 0.5) * this.radius * 0.22;
-          p.curveVertex(Math.cos(angle) * rad, Math.sin(angle) * rad);
+        for (let i = 0; i < points.length; i++) {
+          p.curveVertex(points[i][0], points[i][1]);
         }
         p.endShape(p.CLOSE);
         p.pop();
@@ -837,8 +856,14 @@
         const [r, g, b] = CONFIG.BG;
         p.background(r, g, b);
 
+        // Update every bubble, then split so expanded ones draw last and
+        // always sit on top of everything else (ghosts, ink asset, other bubbles).
+        state.bubbles.forEach(bubble => bubble.update());
+        const expandedBubbles = state.bubbles.filter(bubble => bubble.expanded);
+        const restBubbles = state.bubbles.filter(bubble => !bubble.expanded);
+
         // Spotlights
-        state.bubbles.forEach(bubble => { bubble.update(); bubble.drawSpotlight(p); });
+        restBubbles.forEach(bubble => bubble.drawSpotlight(p));
 
         // Ink asset
         if (imgVertical) {
@@ -870,7 +895,7 @@
         });
 
         // Bubble circles
-        state.bubbles.forEach(bubble => bubble.drawCircle(p));
+        restBubbles.forEach(bubble => bubble.drawCircle(p));
 
         // Ghost circles
         state.ghostBubbles.forEach(g => {
@@ -903,6 +928,13 @@
           p.textStyle(p.NORMAL);
           p.textAlign(p.CENTER, p.TOP);
           p.text("GENERATING", g.x, g.y + g.radius + 6);
+        });
+
+        // Expanded bubble(s) — drawn last so they sit on top of absolutely
+        // everything above (other bubbles, ghosts, the ink asset).
+        expandedBubbles.forEach(bubble => {
+          bubble.drawSpotlight(p);
+          bubble.drawCircle(p);
         });
 
         // Labels + color dots

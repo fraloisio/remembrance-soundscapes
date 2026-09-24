@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>What Does a Memorial Visit Sound Like?</title>
+  <title>What Does Memory Sound Like?</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Jost:wght@200;400;900&display=swap" rel="stylesheet">
@@ -69,7 +69,7 @@
   <div id="p5-container"></div>
   <div id="site-credit">
     <span class="brand">Hope &amp; Despair</span>
-    <span class="tagline">What does a memorial visit sound like?</span>
+    <span class="tagline">What Does Memory Sound Like?</span>
   </div>
   <div id="memories-count"></div>
 
@@ -90,7 +90,7 @@
       BASE_RADIUS_MAX: 42,
       EXPANDED_RADIUS: 220,
       FADE_DURATION_MS: 800,
-      LERP_SPEED: 0.075,
+      LERP_SPEED: 0.05,
       DRIFT_SPEED: { min: 0.07, max: 0.2},
       IMG_DRAW_SIZE: 450,
       // Spotlight (bubble illuminates the dark background)
@@ -107,6 +107,14 @@
 
     const lerp = (a, b, t) => a + (b - a) * t;
     const randomRange = (min, max) => min + Math.random() * (max - min);
+
+    // Shared unit-circle table for the organic bubble outline — computed once
+    // instead of re-deriving cos/sin for every bubble on every frame.
+    const ORGANIC_STEPS = 64;
+    const ORGANIC_ANGLES = Array.from({ length: ORGANIC_STEPS + 1 }, (_, i) => {
+      const angle = (i / ORGANIC_STEPS) * Math.PI * 2;
+      return { cos: Math.cos(angle), sin: Math.sin(angle) };
+    });
 
     // ==============================
     // STATE
@@ -368,20 +376,27 @@
         p.pop();
       }
 
-      buildOrganicPath(ctx, p, r) {
-        const steps = 64;
-        ctx.beginPath();
-        for (let i = 0; i <= steps; i++) {
-          const angle = (i / steps) * Math.PI * 2;
-          // Sample noise in a circle so the shape is closed and consistent
+      // Computes the noise-distorted outline once and returns the point list
+      // so both the clip path and the stroke rim can reuse it without
+      // re-sampling noise() twice per bubble per frame.
+      computeOrganicPoints(p, r) {
+        const points = new Array(ORGANIC_ANGLES.length);
+        for (let i = 0; i < ORGANIC_ANGLES.length; i++) {
+          const { cos, sin } = ORGANIC_ANGLES[i];
           const n = p.noise(
-            Math.cos(angle) * 0.9 + this.shapeOffset,
-            Math.sin(angle) * 0.9 + this.shapeOffset + 200
+            cos * 0.9 + this.shapeOffset,
+            sin * 0.9 + this.shapeOffset + 200
           );
-          const distortion = (n - 0.5) * r * 0.22;
-          const rad = r + distortion;
-          const px = Math.cos(angle) * rad;
-          const py = Math.sin(angle) * rad;
+          const rad = r + (n - 0.5) * r * 0.22;
+          points[i] = [cos * rad, sin * rad];
+        }
+        return points;
+      }
+
+      pathFromPoints(ctx, points) {
+        ctx.beginPath();
+        for (let i = 0; i < points.length; i++) {
+          const [px, py] = points[i];
           if (i === 0) ctx.moveTo(px, py);
           else ctx.lineTo(px, py);
         }
@@ -393,14 +408,19 @@
         p.translate(this.x, this.y);
 
         const ctx = p.drawingContext;
+        const points = this.computeOrganicPoints(p, this.radius);
+
         ctx.save();
-        this.buildOrganicPath(ctx, p, this.radius);
+        this.pathFromPoints(ctx, points);
         ctx.clip();
 
         if (this.image) {
           const iw = this.image.width;
           const ih = this.image.height;
-          const target = CONFIG.IMG_DRAW_SIZE * 1.1;
+          // Scale the drawn image with the bubble's current radius instead of
+          // always rendering it at full expanded size — a 12px idle bubble
+          // has no visual need to raster a ~500px image every frame.
+          const target = Math.max(60, this.radius * (CONFIG.IMG_DRAW_SIZE * 1.1 / CONFIG.EXPANDED_RADIUS));
           const scale = Math.max(target / iw, target / ih);
           const w = iw * scale, h = ih * scale;
           p.image(this.image, -w / 2, -h / 2, w, h);
@@ -413,22 +433,14 @@
 
         ctx.restore();
 
-        // Organic rim — trace the same wobbly path
+        // Organic rim — trace the same wobbly path computed above
         p.noFill();
         const [cr, cg, cb] = CONFIG.CREAM;
         p.stroke(cr, cg, cb, this.expanded ? 50 : 22);
         p.strokeWeight(1);
         p.beginShape();
-        const steps = 64;
-        for (let i = 0; i <= steps; i++) {
-          const angle = (i / steps) * Math.PI * 2;
-          const n = p.noise(
-            Math.cos(angle) * 0.9 + this.shapeOffset,
-            Math.sin(angle) * 0.9 + this.shapeOffset + 200
-          );
-          const distortion = (n - 0.5) * this.radius * 0.22;
-          const rad = this.radius + distortion;
-          p.curveVertex(Math.cos(angle) * rad, Math.sin(angle) * rad);
+        for (let i = 0; i < points.length; i++) {
+          p.curveVertex(points[i][0], points[i][1]);
         }
         p.endShape(p.CLOSE);
 
@@ -736,11 +748,17 @@
         // 1. Near-black background
         p.background(r, g, b);
 
+        // Update every bubble's position/appearance regardless of draw order
+        state.bubbles.forEach(bubble => bubble.update());
+
+        // Expanded bubbles are drawn in a separate pass at the very end so
+        // they always render on top of everything else — other bubbles,
+        // ghosts, and the ink asset — instead of depending on array order.
+        const expandedBubbles = state.bubbles.filter(bubble => bubble.expanded);
+        const restBubbles = state.bubbles.filter(bubble => !bubble.expanded);
+
         // 2. Spotlights — each bubble reveals a pool of olive light beneath it
-        state.bubbles.forEach(bubble => {
-          bubble.update();
-          bubble.drawSpotlight(p);
-        });
+        restBubbles.forEach(bubble => bubble.drawSpotlight(p));
 
         // 3. Ink asset — vertical_hope_33.png, tall on left
         // RGBA asset with dark ink: tint to cream so it's visible on near-black background
@@ -777,7 +795,7 @@
         });
 
         // Draw bubble circles with MULTIPLY — white backgrounds disappear into the scene
-        state.bubbles.forEach(bubble => bubble.drawCircle(p));
+        restBubbles.forEach(bubble => bubble.drawCircle(p));
 
         // Ghost bubble circles
         state.ghostBubbles.forEach(g => {
@@ -814,10 +832,15 @@
           p.text("GENERATING", g.x, g.y + g.radius + 6);
         });
 
-        // Labels on top
-        state.bubbles.forEach(bubble => {
-          if (bubble.expanded) bubble.drawLabel(p);
-          else bubble.drawTimestamp(p);
+        // Timestamps for bubbles at rest
+        restBubbles.forEach(bubble => bubble.drawTimestamp(p));
+
+        // Expanded bubble(s) — drawn last so they sit on top of absolutely
+        // everything above (other bubbles, ghosts, the ink asset).
+        expandedBubbles.forEach(bubble => {
+          bubble.drawSpotlight(p);
+          bubble.drawCircle(p);
+          bubble.drawLabel(p);
         });
 
         // Empty state message
